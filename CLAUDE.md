@@ -33,7 +33,8 @@ there fails, the change is wrong until proven otherwise.
 ## Workflow for a new piece or a change
 
 1. Read `docs/DESIGNING.md` — the specification, the module catalogue and the
-   invariants live there.
+   invariants live there. Read the tools section of `docs/INVENTARIO.md` too: a
+   fitting that needs a tool the user does not own is not worth proposing.
 2. Ask about whatever is undefined (see the checklist below).
 3. Copy the closest file in `src/designs/` (`placard-ejemplo.ts` is the neutral
    template, `mueble-bano.ts` the real commission), change the numbers, and
@@ -44,6 +45,14 @@ there fails, the change is wrong until proven otherwise.
 6. Write the confirmed measurements, the open questions and the reasoning into
    `docs/designs/<id>.md`. That file is the project record; the spec file is only
    the current state of it.
+7. Contrast the hardware and tool lists against `docs/INVENTARIO.md`: what the
+   user has, what has to be bought, and what is close but not the same — say
+   the difference out loud and let the user decide, never substitute silently.
+   The result of the contrast goes in `docs/designs/<id>.md`, because it is
+   dated: once it is bought it stops being true. Nothing in the inventory
+   confirms a measurement; it records what exists, not what this piece needs.
+   Whatever the piece taught you about tools, words or what the local shops
+   stock goes back into `docs/INVENTARIO.md`, one line at a time.
 
 For a change to an existing piece, edit the named constants at the top of its
 design file rather than the numbers scattered through the modules.
