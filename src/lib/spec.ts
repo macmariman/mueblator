@@ -188,7 +188,26 @@ export type BasinFixture = {
   trap?: boolean;
 };
 
-export type FixtureSpec = BasinFixture;
+/**
+ * The tree itself. Illustrative like every fixture: it is not a board, it never
+ * reaches the cut list, and no measurement of the piece depends on it.
+ */
+export type BonsaiFixture = {
+  kind: 'bonsai';
+  /** Centre of the pot on the surface it rests on. */
+  x: number;
+  z: number;
+  /** Outside size of the rectangular pot. */
+  pot: { width: number; depth: number; height: number };
+  /** Height of the canopy above the rim of the pot. */
+  height: number;
+  /** Sideways reach of the canopy. The tree leans this way. */
+  spread: number;
+  /** Same seed, same tree: the drawing never changes between reloads. */
+  seed?: number;
+};
+
+export type FixtureSpec = BasinFixture | BonsaiFixture;
 
 /** How a hardware line is counted. */
 export type HardwareUnit = 'u' | 'par' | 'juego' | 'm' | 'caja';
@@ -221,6 +240,66 @@ export type HardwareItem = {
   sourcing?: string;
   /** Module proposal this item replaces. */
   covers?: HardwareRole;
+};
+
+/**
+ * The assembly group a declared step stands in for: a module kind, a board
+ * group written as `board:<group>`, or one of the two steps that belong to no
+ * module — `'prep'` before the first board goes up, `'finish'` after the last.
+ */
+export type AssemblyTarget =
+  | ModuleSpec['kind']
+  | `board:${string}`
+  | 'prep'
+  | 'finish';
+
+/**
+ * One step of the assembly order, as the design file writes it. Everything the
+ * model works out on its own is a proposal, so a declared step says its own
+ * `status` — `'confirmed'` only once the piece has actually been built this way.
+ */
+export type AssemblyStepSpec = {
+  title: string;
+  body: string;
+  /** The mistake that is easy to make here. Printed under the step. */
+  caution?: string;
+  /** Board references the step puts in place, e.g. `['P01', 'P02']`. */
+  parts?: string[];
+  /** Hardware references it uses, e.g. `['H02']`. */
+  hardware?: string[];
+  status: 'confirmed' | 'proposed';
+  /**
+   * Derived step this one replaces, keeping its place in the order. Without it
+   * the step is an extra one, added after the modules and before `'finish'`.
+   */
+  covers?: AssemblyTarget;
+};
+
+/**
+ * Headings the tool list is grouped under. There is no cutting heading on
+ * purpose: the cut list is finished sizes and the boards arrive cut from the
+ * workshop, so nothing in this list saws anything.
+ */
+export type ToolGroup =
+  | 'Medir y marcar'
+  | 'Presentar y sujetar'
+  | 'Perforar y atornillar'
+  | 'Terminación';
+
+/**
+ * A tool the piece asks for. Not hardware: it is not bought into the furniture
+ * and never reaches the cut list. Derived from what the design actually
+ * contains — a cup hinge asks for a 35 mm bit — and therefore always proposed.
+ */
+export type ToolItem = {
+  name: string;
+  /** Size or type: "35 mm", "60 cm o más". */
+  spec?: string;
+  /** What it is for in this piece, in one line. */
+  reason: string;
+  /** Defaults to "Perforar y atornillar". */
+  group?: ToolGroup;
+  status: 'confirmed' | 'proposed';
 };
 
 export type DimensionLine = {
@@ -266,6 +345,10 @@ export type DesignSpec = {
   fixtures?: FixtureSpec[];
   /** Screws, hinges, plugs: everything that is not a board. */
   hardware?: HardwareItem[];
+  /** Steps that replace or extend the assembly order worked out from the modules. */
+  assembly?: AssemblyStepSpec[];
+  /** Tools declared by hand, on top of the ones the piece asks for. */
+  tools?: ToolItem[];
   /** Extra floating labels in the 3D view. */
   annotations?: Annotation[];
   /** Extra dimension lines beyond the automatic width/height/depth. */

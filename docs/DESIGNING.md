@@ -8,8 +8,9 @@ manual all read the generated model.
 
 ## Workflow
 
-1. Copy the closest design in `src/designs/` (`placard-ejemplo.ts` is a plain
-   template; `mueble-bano.ts` is the real bathroom cabinet).
+1. Copy the closest design in `src/designs/` (`mesa-bonsai.ts` is the simplest
+   one, built out of plain `board` modules; `mueble-bano.ts` is the real
+   bathroom cabinet and uses the whole module catalogue).
 2. Change the id, the name and the numbers.
 3. Register it in `src/designs/index.ts`.
 4. `npm run test` — the geometry checks run against every registered design.
@@ -44,7 +45,7 @@ export const myDesign: DesignSpec = {
   opening: { width: 1200, depth: 600, height: 2400 },
   materials: [ /* id, label, short, thickness, colour, roughness, edge colour */ ],
   modules: [ /* see below */ ],
-  fixtures: [ /* optional basin */ ],
+  fixtures: [ /* optional basin, bonsai */ ],
   hardware: [ /* screws, hinges, plugs; see below */ ],
   highlights: [ /* optional tiles; derived from the opening when omitted */ ],
   pending: [ /* printed under "Antes de fabricar" */ ],
@@ -84,6 +85,25 @@ from the side walls, so they can sit on the face of an upright instead.
 A shape none of these covers is either a `board` with explicit coordinates, or a
 new builder in `src/lib/modules/` — add the type to `spec.ts`, the builder to the
 folder, and one line to the registry in `modules/index.ts`.
+
+## Fixtures
+
+Everything drawn that is not a board: the basin of a bathroom cabinet, the tree
+on a display table. A fixture never reaches the cut list and no measurement
+depends on it — it is there to show what the piece is for.
+
+| Kind | Geometry | Key parameters |
+| --- | --- | --- |
+| `basin-with-faucet` | `fixtures/basin-geometry.ts` | `profile`, `lift`, `scaleX`, `clearance`, `faucet`, `trap` |
+| `bonsai` | `fixtures/bonsai-geometry.ts` | `pot`, `height`, `spread`, `seed` |
+
+A fixture rests on the top of the piece and the camera frames whatever it stands
+above, so a tall one is not cropped. The toggle that hides them takes its name
+from the fixtures the design declares.
+
+A basin is the one fixture that changes a board: the countertop `cutout`. That
+opening is illustrative too — the real one comes from the user's cardboard
+template.
 
 ## Hardware
 
@@ -126,6 +146,53 @@ question for the user, not something to guess.
 
 The list lives in `src/lib/hardware.ts` and is rebuilt with the model, so it
 follows the piece: change the door count and the hinges follow.
+
+## Assembly order and tools
+
+`src/lib/assembly.ts` works out the order the piece goes together in, and the
+tools it asks for, from the modules themselves. Nothing is written by hand
+unless the design chooses to.
+
+The order is the module kinds in `kindOrder` — what is fixed to a wall first,
+what rests on it next, the fronts last — with two steps that belong to no
+module around them: `'prep'` (count and check the boards, check the recess) and
+`'finish'` (adjust, regulate, finish). Inside one rank, the lower board goes
+first. Modules of the same kind each get their own step; hand-placed `board`
+modules collapse into one step per `group`, so six identical slats read as one
+step instead of six.
+
+Every derived step is `'proposed'` and says so on screen and on paper. A design
+overrides one by declaring a step with the matching `covers`:
+
+```ts
+assembly: [
+  {
+    covers: 'board:Patas',      // a module kind, `board:<group>`, 'prep' or 'finish'
+    title: 'Armar los dos laterales, en el piso',
+    body: '…',
+    caution: 'La trampa fácil de este paso.',
+    parts: ['P01', 'P02'],       // references, checked by the tests
+    hardware: ['H03'],
+    status: 'proposed',
+  },
+]
+```
+
+A declared step keeps the place of the one it covers. Without `covers` it is an
+extra step, added after the modules and before `'finish'`. The tests check that
+every reference a step names exists, and that every board is placed by some
+step — a new module that no step reaches will fail the suite.
+
+Nothing in the tool list cuts wood. The cut list is finished sizes and the
+boards arrive cut from the workshop, so the headings run measure, present,
+drill, finish — there is no sawing heading, and a countertop cutout is the
+workshop's job, off the template the user takes there.
+
+Tools follow the same rule in `buildTools`: the ones any assembly needs, plus
+the ones this design brings with it (a cup hinge asks for a 35 mm bit, a board
+screwed to a wall asks for a percussion drill and for the wall type to be
+settled). A design adds its own with `tools`, and a declared tool with the same
+name replaces the derived one.
 
 ## What the tests guarantee
 

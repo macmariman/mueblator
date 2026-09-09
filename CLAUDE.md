@@ -36,9 +36,10 @@ there fails, the change is wrong until proven otherwise.
    invariants live there. Read the tools section of `docs/INVENTARIO.md` too: a
    fitting that needs a tool the user does not own is not worth proposing.
 2. Ask about whatever is undefined (see the checklist below).
-3. Copy the closest file in `src/designs/` (`placard-ejemplo.ts` is the neutral
-   template, `mueble-bano.ts` the real commission), change the numbers, and
-   register it in `src/designs/index.ts`.
+3. Copy the closest file in `src/designs/` (`mesa-bonsai.ts` is the simplest,
+   plain `board` modules; `mueble-bano.ts` the real commission and the full
+   module catalogue), change the numbers, and register it in
+   `src/designs/index.ts`.
 4. `npm run test` — the geometry invariants run against every registered design.
 5. `npm run dev`, then look at the piece: assembled, exploded, doors open, and
    the print snapshot.
@@ -68,6 +69,8 @@ design file rather than the numbers scattered through the modules.
   Register a new builder in `modules/index.ts`.
 - `src/lib/hardware.ts` — the hardware list: what the design declares plus what
   each module proposes (hinges, wall fixings). Proposals are always `'proposed'`.
+- `src/lib/assembly.ts` — the assembly order and the tool list, on the same
+  rule: derived from the modules, always `'proposed'`, overridable per step.
 - `src/lib/fixtures/basin-geometry.ts` — basin profile and the matching cutout.
 - `src/components/CabinetView.tsx` — Three.js scene; reads only the built model.
 - `src/components/App.tsx` — controls, inspector, cut list, printed manual.
@@ -94,6 +97,8 @@ back; prefer `board` for a genuine one-off.
   modules, so a second pair of cleats continues the series.
 - Sizes in the cut list are **finished** sizes. Say so when handing numbers to a
   workshop; they work out board sizes from the banding.
+- The boards arrive cut from the workshop, ready to assemble. Nothing in the
+  tool list saws, and no step asks the user to cut a piece at home.
 - Set `banding: false` on a material that takes no edge tape (solid wood).
 
 ## Language
@@ -116,7 +121,7 @@ already in `App.tsx` and the design files.
 - Upstream reference, if the original behaviour ever needs checking:
   `https://github.com/PabloManzoni/mueble-bano-3d` (public, **no licence file**),
   deployed at `https://pablomanzoni.github.io/mueble-bano-3d/`. Attribution is in
-  the README. Do not publish this project without talking to the author first.
+  the README.
 - The basin geometry is illustrative. The real cutout comes from the cardboard
   template the user takes to the carpenter — never present the model as a
   cutting pattern.
@@ -149,7 +154,11 @@ it in `note` or `pending`, and leave the decision to the user.
   parameter form in the web UI**.
 - Several designs coexist; the header picker switches them and the choice is kept
   in the URL (`?d=<id>`).
-- The inspector does not show per-piece notes, and the printed manual carries no
-  assembly order. Both were removed at the user's request.
+- The inspector does not show per-piece notes. That was removed at the user's
+  request and stays removed.
+- The printed manual **does** carry an assembly order and a tool list, put back
+  at the user's request on 2026-09-08 after an earlier removal. Both are derived
+  in `src/lib/assembly.ts` and are always proposals; a design overrides a step
+  by declaring one with the same `covers`.
 - The printed picture is always the assembled piece with dimensions, doors closed
   and fixtures visible, whatever is on screen at the time.

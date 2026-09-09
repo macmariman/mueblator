@@ -50,6 +50,54 @@ las cuatro medidas de arriba.
    escuadrías la mesita es liviana. Si el ejemplar pasa de unos 15 kg, o el
    lugar es ventoso, conviene anclarla o pasar las patas a 45 × 70 mm.
 
+## El árbol
+
+El bonsái del modelo es **ilustrativo**, igual que la bacha del mueble de baño:
+es un `fixture`, no es madera, no aparece en la lista de corte y ninguna medida
+de la mesita depende de él. Está para mostrar para qué es la pieza y cuánto
+lugar ocupa el ejemplar a esa altura.
+
+- Maceta dibujada de 300 × 200 × 65 mm, copa de 380 mm sobre el borde de la
+  maceta y 260 mm de vuelo. Números de dibujo, no de compra.
+- Se dibuja con una semilla (`seed`), así que el árbol es siempre el mismo entre
+  recargas. Cambiando la semilla sale otro árbol con la misma silueta.
+- Se apaga con el interruptor «Bonsái» del panel.
+- Aparece en la foto impresa del manual, porque el manual siempre muestra la
+  pieza armada con los artefactos visibles. Lo que el carpintero fabrica son las
+  14 maderas de la lista y nada más.
+
+## Orden de armado
+
+Escrito a mano en el archivo, reemplazando al que el motor deduce solo. El
+motor ordena por tipo de módulo y, dentro de eso, de abajo hacia arriba: para
+esta mesita eso da patas, marco, tablero. El orden es correcto pero la maniobra
+no: una mesa de cuatro patas no se arma parando las patas sueltas, se arman dos
+laterales en el piso y recién ahí se levantan.
+
+Los cinco pasos declarados (`assembly` en el archivo) son:
+
+1. Antes de empezar — contar y medir las 14 piezas, estacionar el pino si vino
+   húmedo, y pintar el preservador en cada corte a medida que se hace.
+2. Armar los dos laterales en el piso — P01/P02 con L01, P03/P04 con L02.
+3. Pararlos y cerrar el marco con C01 y C02, midiendo las dos diagonales.
+4. Colocar los seis listones, repartidos con dos separadores de 12 mm.
+5. Ajuste final: lija, preservador, lasur y regatones.
+
+Nada de esto está confirmado: son cinco `'proposed'`. Es la secuencia que
+proponemos, no una que alguien haya construido todavía.
+
+Dos herramientas se declaran a mano porque no salen de ninguna medida: los dos
+separadores de 12 mm (que es la luz entre listones) y el avellanador, para que
+la cabeza del tornillo quede por debajo de la cara del tablero.
+
+**Confirmado (2026-09-09):** las piezas se encargan cortadas a medida, así que
+en casa no se corta nada; la lista de herramienta es sólo de armado. **Abierto:**
+si el corralón las entrega además tratadas para exterior y con una mano de
+terminación. De eso depende el último paso — con la madera cruda el preservador
+va en las testas antes de armar, con la madera terminada sólo se retocan las
+testas y los agujeros que hace el usuario — así que los dos casos están escritos
+en los pasos 1 y 5 y la pregunta quedó en `pending`.
+
 ## Lo que cambió en el motor para esta pieza
 
 Es la primera pieza exenta del proyecto, así que hubo que tocar dos cosas
@@ -61,6 +109,13 @@ menores, sin efecto sobre los muebles ya cargados:
 - El módulo `board` ahora espeja el `explode` que se le escribe, igual que
   espeja la posición. Sin eso, el despiece de una pieza espejada se separaba
   para un solo lado.
+- Nuevo `fixture` `bonsai`, con su geometría en
+  `src/lib/fixtures/bonsai-geometry.ts`, al lado de la de la bacha.
+- La cámara encuadra lo que se dibuja, no sólo el mueble: antes se calculaba
+  sobre la altura de la pieza y le cortaba la copa al árbol. El mueble de baño
+  se aleja un 1,7 % por los 15 mm que la bacha sobresale de la tapa.
+- El interruptor de artefactos toma su nombre del diseño (`model.fixturesLabel`)
+  en vez de decir siempre «Bacha y cañería».
 
 Las cuatro patas se colocan una por una en vez de con `mirrored`, porque el
 sufijo automático de lado es masculino ("izquierdo") y "pata" es femenino.

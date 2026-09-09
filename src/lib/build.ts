@@ -5,6 +5,12 @@ import {
   type HardwareLine,
   type ModuleParts,
 } from './hardware.ts';
+import {
+  buildAssembly,
+  buildTools,
+  type AssemblyStep,
+  type ToolLine,
+} from './assembly.ts';
 import { cm, fmt } from './units.ts';
 import type {
   Annotation,
@@ -41,11 +47,16 @@ export type Model = {
   groups: CutGroup[];
   /** Hinges, screws and plugs: declared by the design or proposed by a module. */
   hardware: HardwareLine[];
+  /** The order the piece goes together in, and the tools each step asks for. */
+  assembly: AssemblyStep[];
+  tools: ToolLine[];
   walls: WallBox[];
   fixtures: FixtureSpec[];
   dimensions: DimensionLine[];
   annotations: Annotation[];
   highlights: { value: string; label: string }[];
+  /** What the fixtures toggle is called for this piece. */
+  fixturesLabel: string;
   printSubtitle: string;
   camera: CameraRig;
 };
@@ -163,6 +174,11 @@ function buildWalls(spec: DesignSpec, frame: Frame): WallBox[] {
   return boxes;
 }
 
+const fixtureNames: Record<FixtureSpec['kind'], string> = {
+  'basin-with-faucet': 'Bacha y cañería',
+  bonsai: 'Bonsái',
+};
+
 /** Name of the reference footprint: the recess for a built-in, the piece itself otherwise. */
 export const openingLabel = (spec: DesignSpec) => spec.opening.label ?? 'Hueco';
 
@@ -203,20 +219,35 @@ function buildAnnotations(spec: DesignSpec, frame: Frame): Annotation[] {
   return [...auto, ...(spec.annotations ?? [])];
 }
 
-/** Viewpoints and limits scaled to the diagonal of the piece. */
-function buildCamera(frame: Frame): CameraRig {
-  const diagonal = Math.hypot(frame.width, frame.topHeight, frame.depth);
+/** How far above the piece a fixture reaches, so the view can frame it. */
+function fixtureReach(fixture: FixtureSpec): number {
+  if (fixture.kind === 'bonsai')
+    return fixture.pot.height + fixture.height + fixture.spread * 0.2;
+  return fixture.lift + Math.max(...fixture.profile.map(([, y]) => y));
+}
+
+/**
+ * Viewpoints and limits scaled to the diagonal of everything that is drawn:
+ * the piece, plus whatever a fixture stands above it.
+ */
+function buildCamera(frame: Frame, spec: DesignSpec): CameraRig {
+  const reach = (spec.fixtures ?? []).reduce(
+      (tallest, f) => Math.max(tallest, fixtureReach(f)),
+      0,
+    ),
+    height = frame.topHeight + Math.max(0, reach);
+  const diagonal = Math.hypot(frame.width, height, frame.depth);
   const at = (direction: Vec3, factor: number): Vec3 => {
     const length = Math.hypot(...direction) || 1,
       distance = (diagonal * factor) / length;
     return [
       direction[0] * distance,
-      frame.topHeight / 2 + direction[1] * distance,
+      height / 2 + direction[1] * distance,
       direction[2] * distance,
     ];
   };
   return {
-    target: [0, frame.topHeight / 2, 0],
+    target: [0, height / 2, 0],
     views: {
       perspective: at([0.58, 0.283, 0.743], 1.63),
       front: at([0, 0.016, 1], 1.47),
@@ -254,6 +285,7 @@ function buildHighlights(spec: DesignSpec, frame: Frame, parts: Part[]) {
 export function buildDesign(spec: DesignSpec): Model {
   const frame = buildFrame(spec),
     { parts, byModule } = buildParts(spec, frame);
+  const hardware = buildHardware(spec, byModule);
   const printSubtitle =
     spec.printSubtitle ??
     `${openingLabel(spec)}: ${fmt(frame.width)} × ${fmt(frame.depth)} mm · cara inferior de tapa: ${fmt(frame.undersideHeight)} mm · altura total de referencia: ${fmt(frame.topHeight)} mm.`;
@@ -262,13 +294,18 @@ export function buildDesign(spec: DesignSpec): Model {
     frame,
     parts,
     groups: groupParts(parts),
-    hardware: buildHardware(spec, byModule),
+    hardware,
+    assembly: buildAssembly(spec, byModule, parts, hardware),
+    tools: buildTools(spec, byModule, hardware),
     walls: buildWalls(spec, frame),
     fixtures: spec.fixtures ?? [],
     dimensions: buildDimensions(spec, frame),
     annotations: buildAnnotations(spec, frame),
     highlights: buildHighlights(spec, frame, parts),
+    fixturesLabel:
+      (spec.fixtures ?? []).map((f) => fixtureNames[f.kind]).join(' y ') ||
+      'Artefactos',
     printSubtitle,
-    camera: buildCamera(frame),
+    camera: buildCamera(frame, spec),
   };
 }

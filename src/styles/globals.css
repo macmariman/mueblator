@@ -1056,3 +1056,218 @@ button.quiet-link:hover {
     background: transparent;
   }
 }
+
+/* Assembly order: numbered steps, each with the pieces it puts in place. */
+.assembly-steps {
+  list-style: none;
+  margin: 0 0 34px;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.assembly-step {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 20px 22px;
+}
+.step-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+.step-ordinal {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #56727f;
+}
+.step-status {
+  padding: 2px 7px;
+  border: 1px solid #d8b489;
+  border-radius: 4px;
+  background: #fdf0e2;
+  color: #8a5520;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.step-body h3 {
+  font-size: 18px;
+  margin: 0 0 8px;
+  color: #163f50;
+}
+.step-body p {
+  margin: 0 0 9px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #40606d;
+}
+.step-body p:last-child {
+  margin-bottom: 0;
+}
+.step-refs {
+  font-family: monospace;
+  font-size: 13px !important;
+  color: #56727f !important;
+}
+.step-refs strong {
+  font-family: var(--font-sans, inherit);
+  color: #163f50;
+}
+.step-caution {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 11px 13px;
+  border: 1px solid #d8b489;
+  border-left-width: 4px;
+  border-radius: 6px;
+  background: #fdf7f0;
+  color: #6f4a1d !important;
+}
+.step-caution svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* Tools: not hardware, so they get their own headings and never a quantity. */
+.tool-heading {
+  margin-top: 8px;
+}
+.tool-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+.tool-group {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 18px 20px;
+}
+.tool-group h3 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #56727f;
+  margin: 0 0 12px;
+}
+.tool-group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.tool-group li strong {
+  display: block;
+  font-size: 14px;
+  color: #163f50;
+}
+.tool-group li span {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #5d7480;
+}
+.tool-spec {
+  display: inline !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 400;
+  color: #6d8794 !important;
+}
+
+@media (max-width: 720px) {
+  .assembly-step {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .step-mark {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+@media print {
+  .assembly-steps {
+    margin: 0 0 4mm;
+    gap: 2mm;
+  }
+  .assembly-step {
+    grid-template-columns: 20mm 1fr;
+    gap: 4mm;
+    padding: 2mm 0;
+    border: none;
+    border-top: 0.3mm solid #c9d8de;
+    border-radius: 0;
+    break-inside: avoid;
+  }
+  .step-ordinal {
+    font-size: 8pt;
+  }
+  .step-status {
+    margin-top: 1mm;
+    padding: 0.3mm 1mm;
+    border: 0.3mm solid #b98a4e;
+    background: transparent;
+    font-size: 7pt;
+  }
+  .step-body h3 {
+    font-size: 10pt;
+    margin: 0 0 1mm;
+  }
+  .step-body p {
+    font-size: 8.5pt;
+    line-height: 1.4;
+    margin: 0 0 1.2mm;
+  }
+  .step-refs {
+    font-size: 8pt !important;
+  }
+  .step-caution {
+    padding: 1.2mm 2mm;
+    border: 0.3mm solid #b98a4e;
+    border-left-width: 1mm;
+    border-radius: 0;
+    background: transparent;
+    font-size: 8pt !important;
+  }
+  .step-caution svg {
+    display: none;
+  }
+  .tool-groups {
+    grid-template-columns: 1fr 1fr;
+    gap: 3mm;
+  }
+  .tool-group {
+    border: none;
+    padding: 0;
+    break-inside: avoid;
+  }
+  .tool-group h3 {
+    font-size: 8pt;
+    margin: 0 0 1.5mm;
+  }
+  .tool-group ul {
+    gap: 1.5mm;
+  }
+  .tool-group li strong {
+    font-size: 8.5pt;
+  }
+  .tool-group li span {
+    font-size: 8pt;
+    line-height: 1.35;
+  }
+  .tool-spec {
+    font-size: 8.5pt !important;
+  }
+}

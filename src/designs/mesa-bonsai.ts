@@ -138,6 +138,20 @@ export const mesaBonsai: DesignSpec = {
   ],
   printSubtitle:
     'Tablero: 600 × 400 mm en seis listones con 12 mm de luz · cara superior a 750 mm · pino tratado, medidas terminadas.',
+  // Illustrative, like the basin of the bathroom cabinet: the tree shows what
+  // the piece is for and how much room it takes. It is not a board and no
+  // measurement depends on it.
+  fixtures: [
+    {
+      kind: 'bonsai',
+      x: 0,
+      z: 0,
+      pot: { width: 300, depth: 200, height: 65 },
+      height: 380,
+      spread: 260,
+      seed: 12,
+    },
+  ],
   // Nothing here is confirmed: the user has not bought or chosen any of it, so
   // every line is a proposal with the reasoning in its note.
   hardware: [
@@ -181,7 +195,79 @@ export const mesaBonsai: DesignSpec = {
       note: 'Terminación sin definir. A la intemperie se renueva cada temporada, con la mesita vacía y seca.',
     },
   ],
+  // The derived order gets the sequence right (legs, frame, top) but not the
+  // grain of it: on a four-legged table you build the two side frames flat on
+  // the floor and only then stand them up. These steps take the place of the
+  // derived ones, keeping their position in the order.
+  assembly: [
+    {
+      covers: 'prep',
+      title: 'Antes de empezar',
+      body: 'Contá las catorce piezas contra la lista de corte y verificá cada medida con el metro. Marcá cada una con su referencia en lápiz, en la cara que va a quedar para abajo. El pino tratado suele venir húmedo: si las piezas están frías al tacto o pesan de más, dejalas estacionar a la sombra, apiladas con separadores, antes de armar. Armá en el piso, sobre un plano parejo.',
+      caution:
+        'Las piezas llegan cortadas, pero cada corte deja madera cruda: el tratamiento no entra hasta el corazón de la tabla. Si te las entregan sin sellar, pintá el preservador en las dos testas de cada pieza antes de armar nada, y en cada agujero apenas lo hacés. Con la mesa armada, a esas caras no llegás más.',
+      status: 'proposed',
+    },
+    {
+      covers: 'board:Patas',
+      title: 'Armar los dos laterales, en el piso',
+      body: 'Armá dos marcos iguales, apoyados de plano: P01 y P02 con el larguero L01, y P03 y P04 con el larguero L02. La pata va por dentro, con la cara exterior del larguero al ras del canto. La cabeza de la pata tiene que quedar a 620 mm: es lo que después recibe el listón. Prensá, controlá la escuadra y atornillá con dos tornillos de 5 × 60 por unión.',
+      parts: ['P01', 'P02', 'P03', 'P04', 'L01', 'L02'],
+      hardware: ['H03'],
+      caution:
+        'Prebarrená siempre. A 25 mm del extremo, un tornillo de 5 mm sin agujero previo abre el pino a lo largo de la veta, y esa pieza ya no sirve.',
+      status: 'proposed',
+    },
+    {
+      covers: 'board:Estructura',
+      title: 'Parar los laterales y cerrar el marco',
+      body: 'Con los dos marcos parados y alguien que los sostenga, atornillá los travesaños C01 y C02 entre los largueros, uno de cada lado, al ras del canto. Antes del apriete final medí las dos diagonales del rectángulo de arriba: si dan igual, la mesa está a escuadra; si no, empujá una esquina hasta emparejarlas.',
+      parts: ['C01', 'C02'],
+      hardware: ['H03'],
+      caution:
+        'Esta es la única oportunidad de corregir la escuadra. Con los listones puestos, la mesa queda rígida con el error adentro y cojea para siempre.',
+      status: 'proposed',
+    },
+    {
+      covers: 'board:Tablero',
+      title: 'Colocar los listones del tablero',
+      body: 'T01 a T06, apoyados sobre los dos largueros y sobre la cabeza de las patas. Empezá por los dos de las puntas, al ras del canto, y repartí los cuatro del medio con dos separadores de 12 mm que vas corriendo. Dos tornillos de 4 × 50 por listón contra cada larguero, avellanados desde arriba.',
+      parts: ['T01', 'T02', 'T03', 'T04', 'T05', 'T06'],
+      hardware: ['H02'],
+      caution:
+        'Avellaná la cabeza de cada tornillo hasta que quede por debajo de la cara. Una cabeza que sobresale junta agua abajo de la maceta y mancha de óxido la madera.',
+      status: 'proposed',
+    },
+    {
+      covers: 'finish',
+      title: 'Ajuste final y terminación',
+      body: 'Repasá los cantos y los bordes de las perforaciones con lija. Si la madera te llegó cruda, pintá con preservador (H04) todo lo que haya quedado sin sellar, dejá secar y recién ahí aplicá el lasur o aceite (H05); si te la entregan ya tratada y con terminación, alcanza con retocar las testas y los agujeros que hiciste vos. Ponele los regatones (H01) a las cuatro patas y probá la mesa en el lugar donde va a vivir.',
+      hardware: ['H01', 'H04', 'H05'],
+      caution:
+        'El regatón no es un detalle: la testa de la pata apoyada en el piso chupa agua por capilaridad y es lo primero que se pudre en una mesa de exterior.',
+      status: 'proposed',
+    },
+  ],
+  tools: [
+    {
+      name: 'Separadores de 12 mm',
+      spec: 'Dos recortes de la misma madera',
+      reason:
+        'Repartir la luz entre listones sin medir seis veces: se apoyan, se atornilla, se corren.',
+      group: 'Medir y marcar',
+      status: 'proposed',
+    },
+    {
+      name: 'Avellanador',
+      spec: 'O una mecha de 8 mm apoyada apenas',
+      reason:
+        'Hundir la cabeza de cada tornillo del tablero por debajo de la cara.',
+      group: 'Perforar y atornillar',
+      status: 'proposed',
+    },
+  ],
   pending: [
+    'Preguntar en el corralón qué te entregan: las piezas cortadas a medida ya está confirmado, falta saber si además vienen tratadas para exterior y con una mano de terminación. Cambia el último paso: si llegan crudas, el preservador va en las testas antes de armar; si llegan terminadas, sólo retocás las testas y los agujeros que hacés vos.',
     'Confirmar escuadrías en el corralón. Están propuestas patas de 45 × 45 mm y el resto de 25 mm de espesor; si lo que hay es 2" × 2" cepillado a 38 × 38, avisá y ajusto el archivo.',
     'El pino tratado suele venir húmedo: dejarlo estacionar a la sombra, apilado con separadores, antes de armar. Si se arma mojado, al secar se abren las juntas y se aflojan los tornillos.',
     'La mesita es liviana para lo alta que es. Si el ejemplar pasa de unos 15 kg, o el lugar es ventoso, conviene anclarla o pasar las patas a 45 × 70 mm.',

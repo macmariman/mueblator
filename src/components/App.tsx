@@ -12,6 +12,7 @@ import {
   PanelTop,
   ArrowDown,
   SquareDashed,
+  TriangleAlert,
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -185,6 +186,82 @@ function HardwareTable({ model }: { model: Model }) {
         ))}
       </TableBody>
     </Table>
+  );
+}
+
+/**
+ * The assembly order. Everything here is worked out from the modules, so the
+ * heading of every step says whether it was reviewed or is still a proposal.
+ */
+function AssemblySteps({ model }: { model: Model }) {
+  return (
+    <ol className="assembly-steps">
+      {model.assembly.map((step) => (
+        <li key={step.id} className="assembly-step">
+          <div className="step-mark">
+            <span className="step-ordinal">Paso {step.order}</span>
+            {step.status === 'proposed' && (
+              <span className="step-status">A confirmar</span>
+            )}
+          </div>
+          <div className="step-body">
+            <h3>{step.title}</h3>
+            {step.parts.length > 0 && (
+              <p className="step-refs">
+                <strong>Piezas:</strong> {step.parts.join(' · ')}
+                {step.hardware.length > 0 && (
+                  <>
+                    {' '}
+                    <strong>Ferretería:</strong> {step.hardware.join(' · ')}
+                  </>
+                )}
+              </p>
+            )}
+            <p>{step.body}</p>
+            {step.caution && (
+              <p className="step-caution">
+                <TriangleAlert size={15} aria-hidden />
+                <span>
+                  <strong>Cuidado: </strong>
+                  {step.caution}
+                </span>
+              </p>
+            )}
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** The tools the piece asks for, under the heading of the moment they are used. */
+function ToolList({ model }: { model: Model }) {
+  const groups = model.tools.reduce<Record<string, typeof model.tools>>(
+    (acc, tool) => {
+      (acc[tool.group] ??= []).push(tool);
+      return acc;
+    },
+    {},
+  );
+  return (
+    <div className="tool-groups">
+      {Object.entries(groups).map(([group, tools]) => (
+        <section key={group} className="tool-group">
+          <h3>{group}</h3>
+          <ul>
+            {tools.map((tool) => (
+              <li key={tool.name}>
+                <strong>
+                  {tool.name}
+                  {tool.spec && <span className="tool-spec"> · {tool.spec}</span>}
+                </strong>
+                <span>{tool.reason}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
   );
 }
 
@@ -416,7 +493,7 @@ export default function App() {
               </label>
               <label className="toggle" htmlFor="fixtures">
                 <PanelTop size={17} />
-                Bacha y cañería
+                {model.fixturesLabel}
                 <Switch
                   id="fixtures"
                   checked={options.fixtures && hasFixtures}
@@ -539,6 +616,40 @@ export default function App() {
             </div>
           </section>
         )}
+        <section className="content-section" id="armado">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">
+                {model.hardware.length > 0 ? '03' : '02'} / ARMADO
+              </span>
+              <h2>Orden de armado</h2>
+            </div>
+            <span className="unit-badge">Propuesta, no instructivo</span>
+          </div>
+          <p className="section-intro">
+            El orden sale del propio mueble: primero lo que se fija, después lo
+            que apoya encima y al final los frentes. Es una propuesta razonable
+            para arrancar, no una secuencia probada: leela entera antes de
+            perforar la primera pieza, y si tu carpintero dice otra cosa,
+            hacele caso a él.
+          </p>
+          <AssemblySteps model={model} />
+          <div className="section-heading tool-heading">
+            <div>
+              <h2>Herramienta</h2>
+            </div>
+            <span className="unit-badge">Lo que pide esta pieza</span>
+          </div>
+          <p className="section-intro">
+            Las maderas llegan cortadas a medida del taller, así que acá no hay
+            nada para cortar: esto es lo que hace falta para armar. Sale de lo
+            que el mueble tiene —una bisagra de cazoleta pide una mecha de
+            35 mm, una pieza atornillada a la pared pide percutor— y lo que no
+            está definido, como el taco y por lo tanto la mecha, depende de cómo
+            sea tu pared.
+          </p>
+          <ToolList model={model} />
+        </section>
         <footer className="site-footer">
           <span>{spec.goal}</span>
           <span>
@@ -578,6 +689,18 @@ export default function App() {
             <HardwareTable model={model} />
           </>
         )}
+        <h2>Orden de armado</h2>
+        <p>
+          Propuesta derivada del propio mueble, no un instructivo probado.
+          Cada paso nombra las piezas y la ferretería de las tablas de arriba.
+        </p>
+        <AssemblySteps model={model} />
+        <h2>Herramienta</h2>
+        <p>
+          Para armar, no para fabricar: las maderas llegan cortadas a medida del
+          taller. Todo lo de abajo es propuesta.
+        </p>
+        <ToolList model={model} />
         {spec.pending && spec.pending.length > 0 && (
           <>
             <h2>Antes de fabricar</h2>

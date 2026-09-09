@@ -12,7 +12,14 @@ import {
   createBasinGeometry,
   createCountertopGeometry,
 } from '@/lib/fixtures/basin-geometry';
-import type { BasinFixture, MaterialSpec, Part, Vec3 } from '@/lib/spec';
+import { createBonsai } from '@/lib/fixtures/bonsai-geometry';
+import type {
+  BasinFixture,
+  BonsaiFixture,
+  MaterialSpec,
+  Part,
+  Vec3,
+} from '@/lib/spec';
 
 export type ViewName = 'perspective' | 'front' | 'side' | 'top';
 
@@ -226,6 +233,9 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
     const basin = built.fixtures.find(
       (f): f is BasinFixture => f.kind === 'basin-with-faucet',
     );
+    const bonsai = built.fixtures.find(
+      (f): f is BonsaiFixture => f.kind === 'bonsai',
+    );
     const top = built.parts.find((p) => p.role === 'countertop');
     const meshes = new Map<string, THREE.Mesh>(),
       outlines = new Map<string, THREE.Mesh>(),
@@ -389,6 +399,11 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
         );
         fixtureGroup.add(pipe);
       }
+    }
+    if (bonsai) {
+      const tree = createBonsai(bonsai);
+      tree.position.y = frame.topHeight;
+      fixtureGroup.add(tree);
     }
     function label(text: string, position: THREE.Vector3, color = '#256377') {
       const c = document.createElement('canvas');
