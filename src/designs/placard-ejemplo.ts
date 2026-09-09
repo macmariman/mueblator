@@ -135,6 +135,28 @@ export const placardEjemplo: DesignSpec = {
       note: 'Listón atornillado al soporte lateral, no a la pared.',
     })),
   ],
+  // Todo lo que no es madera. Lo que no esté acá lo propone el modelo: bisagras
+  // para las puertas y fijación a pared para lo que cuelga de una pared.
+  hardware: [
+    {
+      name: 'Bisagra de cazoleta',
+      spec: 'Cazoleta 35 mm, codo 0',
+      quantity: 8,
+      group: 'Herrajes',
+      status: 'proposed',
+      // `covers` reemplaza la propuesta del módulo de puertas por esta línea.
+      covers: 'door-hinges',
+      note: 'Cuatro por hoja para una puerta de piso a techo. Ejemplo de línea escrita a mano.',
+    },
+    {
+      name: 'Tornillo de ensamble para aglomerado',
+      spec: '4 × 40 mm',
+      quantity: 24,
+      group: 'Ensamble',
+      status: 'proposed',
+      note: 'Ejemplo: unión del travesaño a los soportes laterales.',
+    },
+  ],
   pending: [
     'Relevar el hueco a distintas alturas antes de cortar.',
     'Definir herrajes: bisagras, tiradores y tornillería.',

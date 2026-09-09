@@ -228,7 +228,13 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
     );
     const top = built.parts.find((p) => p.role === 'countertop');
     const meshes = new Map<string, THREE.Mesh>(),
+      outlines = new Map<string, THREE.Mesh>(),
       doorPivots: { pivot: THREE.Group; part: Part }[] = [];
+    /** Halo around the selected board: dark shell, so it reads without colour. */
+    const outlineMaterial = new THREE.MeshBasicMaterial({
+      color: '#0d2733',
+      side: THREE.BackSide,
+    });
     for (const part of built.parts) {
       const spec = materials.get(part.materialId)!;
       const geometry =
@@ -255,6 +261,14 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
           }),
         ),
       );
+      const outline = new THREE.Mesh(geometry, outlineMaterial);
+      outline.scale.set(
+        ...(part.size.map((v) => 1 + 16 / Math.max(v, 1)) as Vec3),
+      );
+      outline.visible = false;
+      outline.renderOrder = -1;
+      mesh.add(outline);
+      outlines.set(part.id, outline);
       if (part.role === 'door' && part.side) {
         const side = part.side;
         // Hinge on the outer edge of the leaf so it opens against its own upright.
@@ -425,6 +439,37 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
       );
     }
     for (const note of built.annotations) label(note.text, vec(note.at));
+    /**
+     * Tag that names the selected board over the model. The reference itself is
+     * the cue, so the piece can be told apart without reading any colour.
+     */
+    const tagCanvas = document.createElement('canvas');
+    tagCanvas.width = 512;
+    tagCanvas.height = 160;
+    const tagContext = tagCanvas.getContext('2d')!;
+    const tagTexture = new THREE.CanvasTexture(tagCanvas);
+    tagTexture.colorSpace = THREE.SRGBColorSpace;
+    const tagSprite = new THREE.Sprite(
+      new THREE.SpriteMaterial({ map: tagTexture, depthTest: false }),
+    );
+    tagSprite.scale.set(230, 72, 1);
+    tagSprite.renderOrder = 20;
+    tagSprite.visible = false;
+    scene.add(tagSprite);
+    const drawTag = (text: string) => {
+      tagContext.clearRect(0, 0, 512, 160);
+      tagContext.fillStyle = '#0d2733';
+      tagContext.fillRect(0, 16, 512, 128);
+      tagContext.fillStyle = '#ffd23f';
+      tagContext.fillRect(0, 16, 512, 12);
+      tagContext.fillStyle = '#ffffff';
+      tagContext.font = '700 74px Arial';
+      tagContext.textAlign = 'center';
+      tagContext.textBaseline = 'middle';
+      tagContext.fillText(text, 256, 88);
+      tagTexture.needsUpdate = true;
+    };
+    const tagPosition = new THREE.Vector3();
     const apply = (o: ViewOptions) => {
       wallGroup.visible = o.walls;
       fixtureGroup.visible = o.fixtures && !o.exploded;
@@ -432,8 +477,11 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
       for (const p of built.parts) {
         const m = meshes.get(p.id)!;
         const mat = m.material as THREE.MeshStandardMaterial;
-        mat.emissive.set(o.selected === p.id ? '#00a8be' : '#000000');
-        mat.emissiveIntensity = o.selected === p.id ? 0.3 : 0;
+        const isSelected = o.selected === p.id;
+        // Brighter face inside a dark halo: the contrast is in the lightness.
+        mat.emissive.set(isSelected ? '#ffffff' : '#000000');
+        mat.emissiveIntensity = isSelected ? 0.24 : 0;
+        outlines.get(p.id)!.visible = isSelected;
         if (p.role !== 'door')
           m.position.set(
             ...(p.position.map((v, i) => v + (o.exploded ? p.explode[i] : 0)) as Vec3),
@@ -449,6 +497,19 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
           part.position[2] + (o.exploded ? part.explode[2] : 0),
         );
         pivot.rotation.y = o.open && !o.exploded ? side * Math.PI * 0.47 : 0;
+      }
+      const tagged = built.parts.find((p) => p.id === o.selected);
+      tagSprite.visible = !!tagged;
+      if (tagged) {
+        const m = meshes.get(tagged.id)!;
+        m.updateWorldMatrix(true, false);
+        m.getWorldPosition(tagPosition);
+        tagSprite.position.set(
+          tagPosition.x,
+          tagPosition.y + tagged.size[1] / 2 + 70,
+          tagPosition.z,
+        );
+        drawTag(tagged.id);
       }
     };
     rig.current = { scene, camera, renderer, controls, apply };

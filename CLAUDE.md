@@ -57,10 +57,15 @@ design file rather than the numbers scattered through the modules.
 - `src/lib/modules/` — one builder per module kind, plus `context.ts` with the
   shared reference planes (`backZ`, `structureZ`, `facadeZ`, `topHeight`…).
   Register a new builder in `modules/index.ts`.
+- `src/lib/hardware.ts` — the hardware list: what the design declares plus what
+  each module proposes (hinges, wall fixings). Proposals are always `'proposed'`.
 - `src/lib/fixtures/basin-geometry.ts` — basin profile and the matching cutout.
 - `src/components/CabinetView.tsx` — Three.js scene; reads only the built model.
 - `src/components/App.tsx` — controls, inspector, cut list, printed manual.
 - `src/styles/globals.css` — screen layout and the A4 print composition.
+
+Screws, hinges, plugs and consumables go in `hardware` on the design, with a
+`status`. Never write `'confirmed'` on a count the user has not given.
 
 A board that no module produces is either a `board` module with explicit
 coordinates, or a new builder. Prefer the new builder when the shape will come

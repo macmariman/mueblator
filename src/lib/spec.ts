@@ -103,6 +103,8 @@ export type DoorsModule = ModuleBase & {
   bottomHeight: number;
   topHeight: number;
   handles?: boolean;
+  /** Hinges per leaf, only used to propose a count in the hardware list. */
+  hingesPerLeaf?: number;
 };
 
 export type SideUprightsModule = ModuleBase & {
@@ -188,6 +190,39 @@ export type BasinFixture = {
 
 export type FixtureSpec = BasinFixture;
 
+/** How a hardware line is counted. */
+export type HardwareUnit = 'u' | 'par' | 'juego' | 'm' | 'caja';
+
+/**
+ * Hardware a module can propose on its own. A declared item naming the same
+ * role replaces the proposal, so a decision the user has taken always wins.
+ */
+export type HardwareRole = 'door-hinges' | 'door-handles' | 'wall-fixings';
+
+/**
+ * One line of the hardware list: everything that is not a board and is needed
+ * to put the piece together. Quantities follow the same rule as measurements —
+ * `'confirmed'` is only for what the user has actually decided or bought.
+ */
+export type HardwareItem = {
+  /** Explicit reference, e.g. "H01". Numbered automatically when omitted. */
+  id?: string;
+  name: string;
+  /** Size, gauge or model: "35 mm codo 0", "6 × 60 mm", "S8". */
+  spec?: string;
+  quantity: number;
+  /** Defaults to `'u'`. */
+  unit?: HardwareUnit;
+  /** Heading it is listed under. Defaults to "Herrajes". */
+  group?: string;
+  note?: string;
+  status: 'confirmed' | 'proposed';
+  /** Where it is found locally: brand, local name, shop. */
+  sourcing?: string;
+  /** Module proposal this item replaces. */
+  covers?: HardwareRole;
+};
+
 export type DimensionLine = {
   from: Vec3;
   to: Vec3;
@@ -204,6 +239,12 @@ export type Opening = {
   depth: number;
   /** Free height, only used to draw the walls. */
   height: number;
+  /**
+   * How the reference footprint is named on screen and in the manual.
+   * Defaults to "Hueco", which only reads right for a piece built into a
+   * recess; a freestanding piece names its own outline ("Tablero", "Mesa").
+   */
+  label?: string;
   walls?: { left?: boolean; right?: boolean; back?: boolean };
 };
 
@@ -223,6 +264,8 @@ export type DesignSpec = {
   materials: MaterialSpec[];
   modules: ModuleSpec[];
   fixtures?: FixtureSpec[];
+  /** Screws, hinges, plugs: everything that is not a board. */
+  hardware?: HardwareItem[];
   /** Extra floating labels in the 3D view. */
   annotations?: Annotation[];
   /** Extra dimension lines beyond the automatic width/height/depth. */

@@ -1,5 +1,10 @@
 import { builders } from './modules/index.ts';
 import type { BuildContext, Frame } from './modules/index.ts';
+import {
+  buildHardware,
+  type HardwareLine,
+  type ModuleParts,
+} from './hardware.ts';
 import { cm, fmt } from './units.ts';
 import type {
   Annotation,
@@ -34,6 +39,8 @@ export type Model = {
   frame: Frame;
   parts: Part[];
   groups: CutGroup[];
+  /** Hinges, screws and plugs: declared by the design or proposed by a module. */
+  hardware: HardwareLine[];
   walls: WallBox[];
   fixtures: FixtureSpec[];
   dimensions: DimensionLine[];
@@ -80,7 +87,11 @@ function buildFrame(spec: DesignSpec): Frame {
   };
 }
 
-function buildParts(spec: DesignSpec, frame: Frame): Part[] {
+/** The boards of the piece, and which module produced each of them. */
+function buildParts(
+  spec: DesignSpec,
+  frame: Frame,
+): { parts: Part[]; byModule: ModuleParts[] } {
   const counters = new Map<string, number>();
   const parts: Part[] = [];
   const ctx: BuildContext = {
@@ -94,12 +105,15 @@ function buildParts(spec: DesignSpec, frame: Frame): Part[] {
       return `${prefix}${String(next).padStart(2, '0')}`;
     },
   };
+  const byModule: ModuleParts[] = [];
   for (const module of spec.modules) {
     const build = builders[module.kind] as (
       m: ModuleSpec,
       c: BuildContext,
     ) => Part[];
-    parts.push(...build(module, ctx));
+    const made = build(module, ctx);
+    byModule.push({ module, parts: made });
+    parts.push(...made);
   }
   const seen = new Set<string>();
   for (const part of parts) {
@@ -107,7 +121,7 @@ function buildParts(spec: DesignSpec, frame: Frame): Part[] {
       throw new Error(`Duplicate reference "${part.id}" in "${spec.id}".`);
     seen.add(part.id);
   }
-  return parts;
+  return { parts, byModule };
 }
 
 /** Identical boards are cut once and listed with their quantity. */
@@ -149,13 +163,16 @@ function buildWalls(spec: DesignSpec, frame: Frame): WallBox[] {
   return boxes;
 }
 
+/** Name of the reference footprint: the recess for a built-in, the piece itself otherwise. */
+export const openingLabel = (spec: DesignSpec) => spec.opening.label ?? 'Hueco';
+
 /** Width, height and depth of the piece, drawn around the model. */
 function buildDimensions(spec: DesignSpec, frame: Frame): DimensionLine[] {
   const auto: DimensionLine[] = [
     {
       from: [-frame.halfWidth, 35, frame.halfDepth + 85],
       to: [frame.halfWidth, 35, frame.halfDepth + 85],
-      text: `Hueco ${fmt(frame.width)} mm`,
+      text: `${openingLabel(spec)} ${fmt(frame.width)} mm`,
       offset: [0, -36, 0],
     },
     {
@@ -219,7 +236,7 @@ function buildHighlights(spec: DesignSpec, frame: Frame, parts: Part[]) {
   if (spec.highlights) return spec.highlights;
   const top = parts.find((p) => p.role === 'countertop');
   return [
-    { value: cm(frame.width), label: 'Hueco de referencia' },
+    { value: cm(frame.width), label: `${openingLabel(spec)} de referencia` },
     top
       ? { value: cm(top.size[0]), label: 'Ancho de tapa' }
       : { value: cm(frame.depth), label: 'Fondo' },
@@ -236,15 +253,16 @@ function buildHighlights(spec: DesignSpec, frame: Frame, parts: Part[]) {
  */
 export function buildDesign(spec: DesignSpec): Model {
   const frame = buildFrame(spec),
-    parts = buildParts(spec, frame);
+    { parts, byModule } = buildParts(spec, frame);
   const printSubtitle =
     spec.printSubtitle ??
-    `Hueco: ${fmt(frame.width)} × ${fmt(frame.depth)} mm · cara inferior de tapa: ${fmt(frame.undersideHeight)} mm · altura total de referencia: ${fmt(frame.topHeight)} mm.`;
+    `${openingLabel(spec)}: ${fmt(frame.width)} × ${fmt(frame.depth)} mm · cara inferior de tapa: ${fmt(frame.undersideHeight)} mm · altura total de referencia: ${fmt(frame.topHeight)} mm.`;
   return {
     spec,
     frame,
     parts,
     groups: groupParts(parts),
+    hardware: buildHardware(spec, byModule),
     walls: buildWalls(spec, frame),
     fixtures: spec.fixtures ?? [],
     dimensions: buildDimensions(spec, frame),

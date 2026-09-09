@@ -38,6 +38,40 @@ Registro del proyecto original, trasladado a Mueblator. El diseño vive en
 6. Confirmar espesor de tapacantos. La lista expresa medidas TERMINADAS: el taller calcula las medidas brutas del tablero descontando los cantos que correspondan.
 7. Comprobar apertura junto a marcos y paredes. Anclajes y tornillos según pared y cargas.
 
+## Ferretería
+
+Ninguna línea de la tabla de herrajes está confirmada todavía. Se listan como
+propuestas, marcadas «a confirmar», y se editan en `src/designs/mueble-bano.ts`.
+
+Las calcula el propio modelo:
+
+- **Bisagras de cazoleta**: 4 en total, dos por hoja, por la altura de las
+  puertas. El tipo recomendado (recta, de superposición total) ya está
+  documentado más arriba; falta elegir marca, modelo y base.
+- **Tiradores**: 2, uno por hoja. Modelo y entrecentros sin definir.
+- **Taco de pared y tornillo**: 12 de cada uno, a razón de uno cada 400 mm y
+  mínimo dos por pieza, sobre las 6 piezas que se fijan a pared (cuatro listones
+  de apoyo y dos soportes de bisagras).
+
+Escritas a mano en el archivo del diseño:
+
+- **2 escuadras metálicas** para colgar el zócalo de la base, según la decisión
+  ya registrada de que el zócalo no apoya en el piso.
+- **12 tornillos de ensamble de 4 × 40 mm** para el travesaño superior contra los
+  soportes laterales y para las escuadras del zócalo. Cantidad estimada.
+- **1 cartucho de silicona sanitaria** para el encuentro de la bacha con la tapa
+  y el fondo de la tapa contra la pared.
+
+Pendiente para cerrar la lista:
+
+1. **De qué es la pared.** Ladrillo hueco, ladrillo macizo, hormigón y placa de
+   yeso llevan tacos distintos, y el baño agrega humedad. Sin esa respuesta el
+   taco no se puede elegir, y de él dependen el largo y el diámetro del tornillo.
+2. Marca, modelo y base de bisagra, y si llevan freno.
+3. Modelo de tirador y entrecentros.
+4. Qué se consigue en Uruguay de cada cosa: el campo `sourcing` de cada línea
+   queda para anotar marca y casa cuando lo vayamos viendo.
+
 ## Impresión
 
 Se captura una vista completa, con puertas cerradas, artefactos y cotas generales, sin paredes ni separación de piezas, independientemente de la vista en pantalla. Debajo se agrupan piezas iguales con sus referencias y cantidades. Luego se incluye la lista de herrajes pendientes: a pedido del usuario, la web ya no muestra el orden de montaje ni las notas por pieza. La cámara vuelve a su estado anterior después de capturar.

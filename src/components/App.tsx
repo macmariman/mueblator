@@ -26,7 +26,7 @@ import CabinetView, {
   type ViewHandle,
   type ViewOptions,
 } from '@/components/CabinetView';
-import { buildDesign, type Model } from '@/lib/build';
+import { buildDesign, openingLabel, type Model } from '@/lib/build';
 import { designById, designs } from '@/designs';
 import { cutLabel, fmt } from '@/lib/units';
 import {
@@ -41,17 +41,21 @@ const groupName = (p: Part) =>
   p.name.replace(/ (izquierda|derecha|izquierdo|derecho)$/, '');
 
 /** Design chosen in the URL, so a link always opens the same piece of furniture. */
-const designParam = () =>
-  new URLSearchParams(window.location.search).get('d');
+const designParam = () => new URLSearchParams(window.location.search).get('d');
 
 function CutTable({
   model,
   interactive = false,
   onSelect,
+  selectedId = null,
+  selectedRow,
 }: {
   model: Model;
   interactive?: boolean;
   onSelect?: (id: string) => void;
+  /** Reference of the board selected in the 3D view, highlighted in its row. */
+  selectedId?: string | null;
+  selectedRow?: React.Ref<HTMLTableRowElement>;
 }) {
   return (
     <Table className="cut-table">
@@ -76,29 +80,54 @@ function CutTable({
           const banded =
             model.spec.materials.find((m) => m.id === p.materialId)?.banding !==
             false;
+          const active = selectedId !== null && ids.includes(selectedId);
           return (
-          <TableRow key={p.id}>
-            <TableCell>
-              <span className="table-id">{ids.join(' / ')}</span>
-            </TableCell>
-            <TableCell>
-              {interactive ? (
-                <button className="table-link" onClick={() => onSelect?.(p.id)}>
-                  {groupName(p)}
-                </button>
-              ) : (
-                groupName(p)
-              )}
-            </TableCell>
-            <TableCell>{quantity}</TableCell>
-            <TableCell className="numeric">{cutLabel(p)} mm</TableCell>
-            <TableCell className="cut-note">
-              {banded && (
-                <strong className="edge-summary">{edgingNote(p)}</strong>
-              )}
-              <span className="edge-location">{p.materialShort}</span>
-            </TableCell>
-          </TableRow>
+            <TableRow
+              key={p.id}
+              className={active ? 'is-selected' : undefined}
+              ref={active ? selectedRow : undefined}
+            >
+              <TableCell>
+                <span className="table-id">
+                  {interactive
+                    ? ids.map((id, i) => (
+                        <span key={id}>
+                          {i > 0 && ' / '}
+                          <button
+                            className={`id-link ${id === selectedId ? 'is-current' : ''}`}
+                            aria-pressed={id === selectedId}
+                            onClick={() => onSelect?.(id)}
+                          >
+                            {id}
+                          </button>
+                        </span>
+                      ))
+                    : ids.join(' / ')}
+                </span>
+              </TableCell>
+              <TableCell>
+                {interactive ? (
+                  <button
+                    className={`table-link ${active ? 'is-current' : ''}`}
+                    onClick={() =>
+                      onSelect?.(active ? (selectedId as string) : p.id)
+                    }
+                  >
+                    {groupName(p)}
+                  </button>
+                ) : (
+                  groupName(p)
+                )}
+              </TableCell>
+              <TableCell>{quantity}</TableCell>
+              <TableCell className="numeric">{cutLabel(p)} mm</TableCell>
+              <TableCell className="cut-note">
+                {banded && (
+                  <strong className="edge-summary">{edgingNote(p)}</strong>
+                )}
+                <span className="edge-location">{p.materialShort}</span>
+              </TableCell>
+            </TableRow>
           );
         })}
       </TableBody>
@@ -106,14 +135,62 @@ function CutTable({
   );
 }
 
+/** Everything that is not a board: hinges, handles, screws, wall plugs. */
+function HardwareTable({ model }: { model: Model }) {
+  return (
+    <Table className="cut-table hardware-table">
+      <colgroup>
+        <col className="col-ref" />
+        <col className="col-piece" />
+        <col className="col-quantity" />
+        <col className="col-size" />
+        <col className="col-note" />
+      </colgroup>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Ref.</TableHead>
+          <TableHead>Elemento</TableHead>
+          <TableHead>Cant.</TableHead>
+          <TableHead>Medida o tipo</TableHead>
+          <TableHead>Notas</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {model.hardware.map((item) => (
+          <TableRow key={item.id}>
+            <TableCell>
+              <span className="table-id">{item.id}</span>
+            </TableCell>
+            <TableCell>
+              <strong className="hardware-name">{item.name}</strong>
+              <span className="hardware-group">{item.group}</span>
+            </TableCell>
+            <TableCell className="numeric">
+              {item.quantity}
+              {item.unit === 'u' ? '' : ` ${item.unit}`}
+            </TableCell>
+            <TableCell>
+              {item.spec ?? '—'}
+              {item.status === 'proposed' && (
+                <span className="hardware-status">A confirmar</span>
+              )}
+            </TableCell>
+            <TableCell className="cut-note">
+              <span className="edge-location">{item.note}</span>
+              {item.sourcing && (
+                <span className="hardware-sourcing">{item.sourcing}</span>
+              )}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
 export default function App() {
-  const [designId, setDesignId] = useState(
-    () => designById(designParam()).id,
-  );
-  const model = useMemo(
-    () => buildDesign(designById(designId)),
-    [designId],
-  );
+  const [designId, setDesignId] = useState(() => designById(designParam()).id);
+  const model = useMemo(() => buildDesign(designById(designId)), [designId]);
   const { spec, frame } = model;
   const [options, setOptions] = useState<ViewOptions>({
     dimensions: true,
@@ -127,7 +204,8 @@ export default function App() {
     [printing, setPrinting] = useState(false),
     [printError, setPrintError] = useState('');
   const view = useRef<ViewHandle>(null),
-    printImage = useRef<HTMLImageElement>(null);
+    printImage = useRef<HTMLImageElement>(null),
+    selectedRow = useRef<HTMLTableRowElement>(null);
   const selected = model.parts.find((p) => p.id === options.selected);
   const hasFixtures = model.fixtures.length > 0;
   const select = useCallback(
@@ -182,6 +260,13 @@ export default function App() {
     document
       .getElementById('modelo')
       ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  /** Jump from the inspector to the row of the board selected in the 3D view. */
+  function showInList() {
+    selectedRow.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    });
   }
   return (
     <>
@@ -268,8 +353,12 @@ export default function App() {
               </button>
             </div>
             <div className="view-presets">
-              <button onClick={() => view.current?.view('front')}>Frente</button>
-              <button onClick={() => view.current?.view('side')}>Lateral</button>
+              <button onClick={() => view.current?.view('front')}>
+                Frente
+              </button>
+              <button onClick={() => view.current?.view('side')}>
+                Lateral
+              </button>
               <button onClick={() => view.current?.view('top')}>
                 Desde arriba
               </button>
@@ -348,7 +437,9 @@ export default function App() {
                   <button
                     className="clear"
                     aria-label="Quitar selección"
-                    onClick={() => setOptions((v) => ({ ...v, selected: null }))}
+                    onClick={() =>
+                      setOptions((v) => ({ ...v, selected: null }))
+                    }
                   >
                     ×
                   </button>
@@ -373,6 +464,9 @@ export default function App() {
                   {selected.machining && (
                     <p className="machining-note">{machiningLabel(selected)}</p>
                   )}
+                  <button className="quiet-link" onClick={showInList}>
+                    Verla en la lista de corte <ArrowDown size={16} />
+                  </button>
                 </>
               ) : (
                 <>
@@ -413,17 +507,43 @@ export default function App() {
           </div>
           <p className="section-intro">
             Las medidas salen del mismo modelo 3D. Tocá el nombre de una pieza
-            para identificarla en el mueble.
+            —o una referencia, para elegir izquierda o derecha— y se ilumina en
+            el mueble. La pieza que tocás en el dibujo queda marcada acá.
           </p>
           <div className="table-card">
-            <CutTable model={model} interactive onSelect={focusPart} />
+            <CutTable
+              model={model}
+              interactive
+              onSelect={focusPart}
+              selectedId={options.selected}
+              selectedRow={selectedRow}
+            />
           </div>
         </section>
+        {model.hardware.length > 0 && (
+          <section className="content-section" id="ferreteria">
+            <div className="section-heading">
+              <div>
+                <span className="eyebrow">02 / FERRETERÍA</span>
+                <h2>Herrajes y fijaciones</h2>
+              </div>
+              <span className="unit-badge">Cantidades de referencia</span>
+            </div>
+            <p className="section-intro">
+              Todo lo que no es madera. Lo que dice «a confirmar» es una
+              propuesta calculada a partir del mueble, no una decisión tomada:
+              revisala antes de comprar.
+            </p>
+            <div className="table-card">
+              <HardwareTable model={model} />
+            </div>
+          </section>
+        )}
         <footer className="site-footer">
           <span>{spec.goal}</span>
           <span>
-            Modelo en milímetros · hueco {fmt(frame.width)} × {fmt(frame.depth)}{' '}
-            mm · medidas de referencia
+            Modelo en milímetros · {openingLabel(spec).toLowerCase()}{' '}
+            {fmt(frame.width)} × {fmt(frame.depth)} mm · medidas de referencia
           </span>
         </footer>
       </main>
@@ -448,6 +568,16 @@ export default function App() {
           {model.parts.length} piezas en total.
         </p>
         <CutTable model={model} />
+        {model.hardware.length > 0 && (
+          <>
+            <h2>Herrajes y fijaciones</h2>
+            <p>
+              Cantidades de referencia. Las marcadas «a confirmar» salen del
+              propio mueble y hay que definirlas antes de comprar.
+            </p>
+            <HardwareTable model={model} />
+          </>
+        )}
         {spec.pending && spec.pending.length > 0 && (
           <>
             <h2>Antes de fabricar</h2>

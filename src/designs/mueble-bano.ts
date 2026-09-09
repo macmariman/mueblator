@@ -185,6 +185,33 @@ export const muebleBano: DesignSpec = {
       ],
     },
   ],
+  // Nothing here is confirmed yet: son propuestas para revisar en la ferretería.
+  // Las bisagras y la fijación a pared las propone el propio modelo.
+  hardware: [
+    {
+      name: 'Escuadra metálica',
+      quantity: 2,
+      group: 'Ensamble',
+      status: 'proposed',
+      note: 'Para colgar el zócalo Z01 de la base: el zócalo no apoya en el piso. Dos escuadras propuestas, una por extremo.',
+    },
+    {
+      name: 'Tornillo de ensamble para aglomerado',
+      spec: '4 × 40 mm',
+      quantity: 12,
+      group: 'Ensamble',
+      status: 'proposed',
+      note: 'Unión del travesaño F01 a los soportes laterales y de las escuadras del zócalo. Cantidad estimada, sin definir el tipo de cabeza.',
+    },
+    {
+      name: 'Silicona sanitaria',
+      spec: 'Cartucho',
+      quantity: 1,
+      group: 'Consumibles',
+      status: 'proposed',
+      note: 'Sellado del encuentro de la bacha con la tapa y del fondo de la tapa contra la pared. Confirmar recién cuando esté resuelto el recorte real.',
+    },
+  ],
   highlights: [
     { value: '79,8 cm', label: 'Hueco de referencia' },
     { value: '79,6 cm', label: 'Ancho de tapa' },
@@ -198,6 +225,7 @@ export const muebleBano: DesignSpec = {
     'Entregar el molde de cartón de la bacha actual: esa plantilla define el recorte real.',
     'Elegir marca, modelo y base de bisagra antes de definir perforaciones.',
     'Confirmar espesor de tapacantos: la lista expresa medidas terminadas.',
+    'Definir el taco de pared: el hueco, el macizo, el hormigón y la placa de yeso llevan tacos distintos.',
   ],
   decisionsDoc: 'docs/designs/mueble-bano.md',
 };

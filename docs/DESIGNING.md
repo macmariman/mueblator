@@ -45,6 +45,7 @@ export const myDesign: DesignSpec = {
   materials: [ /* id, label, short, thickness, colour, roughness, edge colour */ ],
   modules: [ /* see below */ ],
   fixtures: [ /* optional basin */ ],
+  hardware: [ /* screws, hinges, plugs; see below */ ],
   highlights: [ /* optional tiles; derived from the opening when omitted */ ],
   pending: [ /* printed under "Antes de fabricar" */ ],
 };
@@ -84,6 +85,48 @@ A shape none of these covers is either a `board` with explicit coordinates, or a
 new builder in `src/lib/modules/` — add the type to `spec.ts`, the builder to the
 folder, and one line to the registry in `modules/index.ts`.
 
+## Hardware
+
+Everything that is not a board — hinges, handles, screws, wall plugs, brackets,
+sealant — is a line of `hardware`:
+
+```ts
+hardware: [
+  {
+    name: 'Bisagra de cazoleta',
+    spec: 'Cazoleta 35 mm, codo 0',
+    quantity: 8,
+    unit: 'u',              // 'u' | 'par' | 'juego' | 'm' | 'caja'
+    group: 'Herrajes',      // Herrajes · Fijación a pared · Ensamble · Consumibles
+    status: 'proposed',     // 'confirmed' only for what the user actually decided
+    sourcing: 'Marca y casa donde se consigue, cuando se sepa',
+    covers: 'door-hinges',  // replaces the proposal the doors module would make
+    note: 'Por qué esa cantidad y qué falta decidir.',
+  },
+],
+```
+
+`status` is required, and it follows the same rule as every measurement: a count
+worked out from the model is `'proposed'`, never `'confirmed'`. Proposed lines
+print with an "A confirmar" badge on screen and in the manual.
+
+Modules propose what they obviously need, so a design that declares nothing
+still gets a usable list:
+
+| Role | Proposed by | How the count is worked out |
+| --- | --- | --- |
+| `door-hinges` | `doors` | `hingesPerLeaf`, or the trade rule by leaf height: 2 up to 900 mm, 3 up to 1600 mm, 4 above |
+| `door-handles` | `doors` with handles | one per leaf |
+| `wall-fixings` | `wall-cleats`, `side-uprights` | one fixing every 400 mm of board, minimum two, as a screw line and a plug line |
+
+A declared item naming that role in `covers` replaces the proposal entirely, so
+a decision the user has taken always wins over the rule of thumb. The plug and
+screw lines stay generic on purpose: the plug depends on the wall, which is a
+question for the user, not something to guess.
+
+The list lives in `src/lib/hardware.ts` and is rebuilt with the model, so it
+follows the piece: change the door count and the hinges follow.
+
 ## What the tests guarantee
 
 `tests/designs.test.mjs` runs against every registered design:
@@ -96,6 +139,11 @@ folder, and one line to the registry in `modules/index.ts`.
   both width and depth;
 - the doors fill the opening with the declared joints and keep their setback;
 - the banding schedule names physical edges.
+
+`tests/hardware.test.mjs` checks the hardware list: unique references, whole
+positive quantities, everything the model works out on its own marked
+`'proposed'` and carrying the reasoning in its note, declared items kept as
+written, hinges for every leaf, and fixings for every board screwed to a wall.
 
 `tests/mueble-bano.test.mjs` pins the measurements confirmed for the bathroom
 cabinet, and `tests/basin.test.mjs` checks that the countertop opening clears the

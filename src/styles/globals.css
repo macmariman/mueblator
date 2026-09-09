@@ -389,8 +389,19 @@ aside > p {
   letter-spacing: 1.2px;
 }
 .has-selection {
-  background: #eff9fa;
-  border: 1px solid #94c7d0;
+  background: #ffffff;
+  border: 2px solid #0d2733;
+  border-left-width: 8px;
+  border-left-color: #ffd23f;
+}
+/* Same badge as the tag drawn over the piece in the 3D view. */
+.selected-heading .part-id {
+  background: #0d2733;
+  color: #ffffff;
+  font-weight: 700;
+  border-bottom: 3px solid #ffd23f;
+  border-radius: 4px;
+  padding: 4px 7px;
 }
 .selected-heading {
   display: flex;
@@ -439,6 +450,19 @@ aside > p {
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
+}
+button.quiet-link {
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.selected-card button.quiet-link {
+  margin-top: 14px;
+}
+button.quiet-link:hover {
+  text-decoration: underline;
 }
 .content-section {
   max-width: 1280px;
@@ -511,6 +535,58 @@ aside > p {
 }
 .table-link:hover {
   text-decoration: underline;
+}
+/* Reference of each board: one button per piece, so a pair can be told apart. */
+.id-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.id-link:hover {
+  color: #007e90;
+  text-decoration: underline;
+}
+.id-link.is-current {
+  color: #ffffff;
+  font-weight: 700;
+  background: #0d2733;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+/*
+ * Row of the board selected in the 3D view. The mark is luminance, not hue:
+ * the row inverts to dark on light so it reads with any colour vision.
+ */
+.cut-table tr.is-selected td {
+  background: #0d2733;
+  color: #ffffff;
+}
+.cut-table tr.is-selected td:first-child {
+  box-shadow: inset 6px 0 0 #ffd23f;
+}
+.cut-table tr.is-selected .table-id,
+.cut-table tr.is-selected .numeric,
+.cut-table tr.is-selected .edge-summary,
+.cut-table tr.is-selected .edge-location,
+.cut-table tr.is-selected .cut-observation,
+.cut-table tr.is-selected .hardware-group,
+.cut-table tr.is-selected .hardware-sourcing {
+  color: #eaf4f7;
+}
+.cut-table tr.is-selected .id-link.is-current {
+  background: #ffd23f;
+  color: #10222b;
+}
+.cut-table tr.is-selected .id-link:hover {
+  color: #ffffff;
+}
+.table-link.is-current {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .cut-note {
   max-width: 260px !important;
@@ -930,5 +1006,53 @@ aside > p {
   .print-pending li {
     margin-bottom: 1.4mm;
     break-inside: avoid;
+  }
+}
+
+/* Hardware list: hinges, screws and plugs, next to the cut list. */
+.hardware-name {
+  display: block;
+  font-size: 14px;
+  color: #163f50;
+}
+.hardware-group {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: #6d8794;
+}
+.hardware-status {
+  display: block;
+  width: fit-content;
+  margin-top: 6px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #fdf0e2;
+  color: #8a5520;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.hardware-sourcing {
+  display: block;
+  margin-top: 5px;
+  color: #007e90;
+  font-weight: 600;
+}
+.hardware-table td:nth-child(4) {
+  white-space: normal;
+}
+@media print {
+  .print-document .hardware-name,
+  .print-document .hardware-group,
+  .print-document .hardware-status,
+  .print-document .hardware-sourcing {
+    font-size: 8pt !important;
+  }
+  .print-document .hardware-status {
+    margin-top: 1mm;
+    padding: 0.3mm 1mm;
+    border: 0.3mm solid #b98a4e;
+    background: transparent;
   }
 }
