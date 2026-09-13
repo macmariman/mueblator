@@ -174,10 +174,24 @@ function buildWalls(spec: DesignSpec, frame: Frame): WallBox[] {
   return boxes;
 }
 
-const fixtureNames: Record<FixtureSpec['kind'], string> = {
-  'basin-with-faucet': 'Bacha y cañería',
-  bonsai: 'Bonsái',
-};
+/** Lower case: the toggle joins them into one label and capitalises the first. */
+function fixtureName(fixture: FixtureSpec) {
+  switch (fixture.kind) {
+    case 'basin-with-faucet':
+      return 'bacha y cañería';
+    case 'bonsai':
+      return 'bonsái';
+    case 'existing-top':
+      return fixture.vessel ? 'mesada y bacha' : 'mesada existente';
+    case 'feet':
+      return 'patas';
+  }
+}
+
+function fixturesLabel(fixtures: FixtureSpec[]) {
+  const label = [...new Set(fixtures.map(fixtureName))].join(', ');
+  return label ? label[0].toUpperCase() + label.slice(1) : 'Artefactos';
+}
 
 /** Name of the reference footprint: the recess for a built-in, the piece itself otherwise. */
 export const openingLabel = (spec: DesignSpec) => spec.opening.label ?? 'Hueco';
@@ -220,7 +234,15 @@ function buildAnnotations(spec: DesignSpec, frame: Frame): Annotation[] {
 }
 
 /** How far above the piece a fixture reaches, so the view can frame it. */
-function fixtureReach(fixture: FixtureSpec): number {
+function fixtureReach(fixture: FixtureSpec, frame: Frame): number {
+  if (fixture.kind === 'feet') return 0;
+  if (fixture.kind === 'existing-top')
+    return (
+      fixture.undersideHeight +
+      fixture.thickness +
+      (fixture.vessel?.height ?? 0) -
+      frame.topHeight
+    );
   if (fixture.kind === 'bonsai')
     return fixture.pot.height + fixture.height + fixture.spread * 0.2;
   return fixture.lift + Math.max(...fixture.profile.map(([, y]) => y));
@@ -232,7 +254,7 @@ function fixtureReach(fixture: FixtureSpec): number {
  */
 function buildCamera(frame: Frame, spec: DesignSpec): CameraRig {
   const reach = (spec.fixtures ?? []).reduce(
-      (tallest, f) => Math.max(tallest, fixtureReach(f)),
+      (tallest, f) => Math.max(tallest, fixtureReach(f, frame)),
       0,
     ),
     height = frame.topHeight + Math.max(0, reach);
@@ -302,9 +324,7 @@ export function buildDesign(spec: DesignSpec): Model {
     dimensions: buildDimensions(spec, frame),
     annotations: buildAnnotations(spec, frame),
     highlights: buildHighlights(spec, frame, parts),
-    fixturesLabel:
-      (spec.fixtures ?? []).map((f) => fixtureNames[f.kind]).join(' y ') ||
-      'Artefactos',
+    fixturesLabel: fixturesLabel(spec.fixtures ?? []),
     printSubtitle,
     camera: buildCamera(frame, spec),
   };

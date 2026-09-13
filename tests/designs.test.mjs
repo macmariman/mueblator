@@ -89,13 +89,19 @@ for (const model of models) {
     }
   });
 
-  test(label('the doors fill the opening and keep their setback'), () => {
+  test(label('the doors fill their stretch and keep their setback'), () => {
     const doors = parts.filter((p) => p.role === 'door');
     if (doors.length === 0) return;
     const module = spec.modules.find((m) => m.kind === 'doors');
+    const [left, right] = module.span ?? [-frame.halfWidth, frame.halfWidth];
+    assert.ok(left >= -frame.halfWidth && right <= frame.halfWidth, 'the span leaves the opening');
     assert.equal(
       doors.reduce((n, p) => n + p.size[0], 0) + (doors.length + 1) * module.gap,
-      frame.width,
+      right - left,
+    );
+    assert.ok(
+      Math.abs(doors[0].position[0] - doors[0].size[0] / 2 - module.gap - left) < 0.001,
+      'the first leaf does not start at the edge of its stretch',
     );
     for (const door of doors)
       assert.equal(

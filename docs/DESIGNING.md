@@ -70,7 +70,7 @@ and `explode`.
 | Kind | What it produces | Key parameters |
 | --- | --- | --- |
 | `countertop` | the slab, with an optional fixture cutout and a milled front edge | `undersideHeight`, `depth`, `clearance`, `frontRadius`, `cutout` |
-| `doors` | a row of hinged fronts, split evenly across the opening | `count`, `gap`, `setback`, `bottomHeight`, `topHeight`, `handles` |
+| `doors` | a row of hinged fronts, split evenly across the opening, or across `span` | `count`, `gap`, `setback`, `bottomHeight`, `topHeight`, `handles`, `span`, `cupBoring` |
 | `side-uprights` | the two strips fixed to the side walls that the doors hinge on | `bottomHeight`, `topHeight`, `depth` |
 | `front-rail` | horizontal rail behind the fronts | `topHeight`, `height`, `betweenUprights` |
 | `plinth` | front skirt hung under the base | `floorGap`, `height` |
@@ -79,7 +79,11 @@ and `explode`.
 | `board` | escape hatch: a board placed by hand, optionally mirrored | `size`, `position`, `mirrored` |
 
 `depth: 'to-structure'` stops a panel right behind the fronts, so it never
-collides with the doors whatever the setback is. `inset` moves the cleats away
+collides with the doors whatever the setback is. `span: [left, right]` gives
+the doors a stretch narrower than the opening — the X of its two edges, joints
+included — for fronts flanked by open niches. `cupBoring: 'workshop'` says the
+leaves arrive with the hinge cups bored: the tool list drops the 35 mm bit and
+the assembly step says the leaves come bored. `inset` moves the cleats away
 from the side walls, so they can sit on the face of an upright instead.
 
 A shape none of these covers is either a `board` with explicit coordinates, or a
@@ -96,9 +100,14 @@ depends on it — it is there to show what the piece is for.
 | --- | --- | --- |
 | `basin-with-faucet` | `fixtures/basin-geometry.ts` | `profile`, `lift`, `scaleX`, `clearance`, `faucet`, `trap` |
 | `bonsai` | `fixtures/bonsai-geometry.ts` | `pot`, `height`, `spread`, `seed` |
+| `existing-top` | boxes, a lathe and a tube in `CabinetView.tsx` | `undersideHeight`, `thickness`, `apron`, `trap`, `vessel` |
+| `feet` | cylinders in `CabinetView.tsx` | `height`, `diameter`, `positions` |
 
 A fixture rests on the top of the piece and the camera frames whatever it stands
-above, so a tall one is not cropped. The toggle that hides them takes its name
+above, so a tall one is not cropped. `existing-top` is the exception: a slab
+that is already there and stays, drawn at its own height across the whole
+opening, with its apron and the drain trap under it, so the piece can be
+judged against what it has to clear. The toggle that hides them takes its name
 from the fixtures the design declares.
 
 A basin is the one fixture that changes a board: the countertop `cutout`. That

@@ -105,6 +105,16 @@ export type DoorsModule = ModuleBase & {
   handles?: boolean;
   /** Hinges per leaf, only used to propose a count in the hardware list. */
   hingesPerLeaf?: number;
+  /**
+   * Left and right edge (X) of the stretch the leaves share, joints included.
+   * Defaults to the whole opening; narrower for fronts flanked by open niches.
+   */
+  span?: [number, number];
+  /**
+   * Who bores the 35 mm hinge cups. `'workshop'` means the leaves arrive
+   * bored, so the assembly drops the cup bit and says so. Defaults to home.
+   */
+  cupBoring?: 'home' | 'workshop';
 };
 
 export type SideUprightsModule = ModuleBase & {
@@ -207,7 +217,45 @@ export type BonsaiFixture = {
   seed?: number;
 };
 
-export type FixtureSpec = BasinFixture | BonsaiFixture;
+/**
+ * A top that is already there and stays: a stone slab the piece goes under,
+ * with the apron hanging from its front edge and the drain trap below it.
+ * Drawn so the piece can be judged against what it has to clear; it spans the
+ * whole opening, never reaches the cut list and nothing is placed on it.
+ */
+export type ExistingTopFixture = {
+  kind: 'existing-top';
+  undersideHeight: number;
+  thickness: number;
+  /** Strip hanging from the front edge: how low it reaches and how thick it is. */
+  apron?: { bottomHeight: number; thickness: number };
+  /** Drain trap: centre on X, its foremost point on Z, and its lowest point. */
+  trap?: { x: number; frontZ: number; lowestHeight: number; radius: number };
+  /**
+   * Oval vessel basin standing on the slab: centre on X/Z and outside size.
+   * `length` runs along X, `width` along Z, `height` from the slab to the rim.
+   */
+  vessel?: { x: number; z: number; length: number; width: number; height: number };
+};
+
+/**
+ * Adjustable feet under the carcass. They are hardware, not boards, so they
+ * never reach the cut list: this only draws them where the piece stands.
+ */
+export type FeetFixture = {
+  kind: 'feet';
+  /** Floor to the underside of the carcass. */
+  height: number;
+  diameter: number;
+  /** [x, z] of each foot. */
+  positions: [number, number][];
+};
+
+export type FixtureSpec =
+  | BasinFixture
+  | BonsaiFixture
+  | ExistingTopFixture
+  | FeetFixture;
 
 /** How a hardware line is counted. */
 export type HardwareUnit = 'u' | 'par' | 'juego' | 'm' | 'caja';

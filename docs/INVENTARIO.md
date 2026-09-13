@@ -49,6 +49,9 @@ acá, y para que la copy en pantalla no suene traducida.
 
 | Cómo le digo | Cómo le dice el carpintero | En el código | Nota |
 | --- | --- | --- | --- |
+| Frentín | — | `apron` (fixture `existing-top`) | El borde grueso que baja del frente de la mesada de mármol. |
+| Taco (del marco) | — | — | El pie del marco de la puerta, más ancho y más profundo que el marco. |
+| Manija | Tirador | `handles`, rol `door-handles` | «Tirador» no le resultó conocido al usuario (2026-09-13); en la copy, «manija». |
 
 Anotá también la palabra que **no** funcionó: si dijiste una cosa y en la
 carpintería te miraron raro, esa es la línea que más vale.
@@ -65,8 +68,12 @@ _(vacío)_
 
 ### Herrajes
 
-_(vacío)_
+- **Patas para muebles, Sodimac Uruguay** (web, 2026-09-13). Marca Fixser, se venden por unidad.
+  - Regulables de 150–175 mm: ABS negra o blanca a $149, aluminio a $179.
+  - Fijas de 150 mm: ABS de $99 a $149, aluminio Curve a $349.
+  - Hay además fijas de 100, 120 y 200 mm.
+  - La web no muestra stock, carga máxima, forma de fijación ni largo de tornillo. Hay que verlo en el local.
 
 ### Proveedores
 
-_(vacío)_
+- **Sodimac Uruguay** (sodimac.com.uy): categoría «Patas para muebles», con 68 productos en la web (2026-09-13).

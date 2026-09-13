@@ -16,6 +16,8 @@ import { createBonsai } from '@/lib/fixtures/bonsai-geometry';
 import type {
   BasinFixture,
   BonsaiFixture,
+  ExistingTopFixture,
+  FeetFixture,
   MaterialSpec,
   Part,
   Vec3,
@@ -404,6 +406,150 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
       const tree = createBonsai(bonsai);
       tree.position.y = frame.topHeight;
       fixtureGroup.add(tree);
+    }
+    const feet = built.fixtures.find(
+      (f): f is FeetFixture => f.kind === 'feet',
+    );
+    if (feet) {
+      const plastic = new THREE.MeshStandardMaterial({
+        color: '#2f383d',
+        roughness: 0.6,
+        metalness: 0.1,
+      });
+      for (const [x, z] of feet.positions) {
+        const foot = new THREE.Mesh(
+          new THREE.CylinderGeometry(
+            feet.diameter / 2,
+            feet.diameter / 2,
+            feet.height,
+            24,
+          ),
+          plastic,
+        );
+        foot.position.set(x, feet.height / 2, z);
+        foot.castShadow = true;
+        fixtureGroup.add(foot);
+      }
+    }
+    const existing = built.fixtures.find(
+      (f): f is ExistingTopFixture => f.kind === 'existing-top',
+    );
+    if (existing) {
+      // Clearly darker than any white board, so it reads apart without colour.
+      const stone = new THREE.MeshStandardMaterial({
+        color: '#8f979c',
+        roughness: 0.35,
+        metalness: 0,
+      });
+      const slabBox = (size: Vec3, position: Vec3) => {
+        const geometry = new THREE.BoxGeometry(...size),
+          mesh = new THREE.Mesh(geometry, stone);
+        mesh.position.set(...position);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.add(
+          new THREE.LineSegments(
+            new THREE.EdgesGeometry(geometry),
+            new THREE.LineBasicMaterial({
+              color: 0x4d5559,
+              transparent: true,
+              opacity: 0.7,
+            }),
+          ),
+        );
+        fixtureGroup.add(mesh);
+      };
+      slabBox(
+        [frame.width, existing.thickness, frame.depth],
+        [0, existing.undersideHeight + existing.thickness / 2, 0],
+      );
+      if (existing.apron) {
+        const drop = existing.undersideHeight - existing.apron.bottomHeight;
+        slabBox(
+          [frame.width, drop, existing.apron.thickness],
+          [
+            0,
+            existing.apron.bottomHeight + drop / 2,
+            frame.frontZ - existing.apron.thickness / 2,
+          ],
+        );
+      }
+      if (existing.vessel) {
+        // Oval vessel: a lathe of the width, stretched on X to the length. The
+        // profile runs from the outside base up to the rim and back down inside.
+        const { x, z, length, width, height } = existing.vessel;
+        const r = width / 2,
+          wall = 7;
+        const profile: [number, number][] = [
+          [0, 0],
+          [0.45 * r, 0],
+          [0.7 * r, 0.12 * height],
+          [0.9 * r, 0.45 * height],
+          [0.98 * r, 0.8 * height],
+          [r, height],
+          [r - wall, height],
+          [0.98 * r - wall, 0.8 * height],
+          [0.9 * r - wall, 0.45 * height],
+          [0.68 * r - wall, 0.14 * height + wall],
+          [0.3 * r, wall],
+          [0, wall],
+        ];
+        const bowl = new THREE.Mesh(
+          new THREE.LatheGeometry(
+            profile.map(([pr, py]) => new THREE.Vector2(pr, py)),
+            96,
+          ),
+          new THREE.MeshStandardMaterial({
+            color: '#fffdfa',
+            roughness: 0.23,
+            metalness: 0.03,
+            side: THREE.DoubleSide,
+          }),
+        );
+        bowl.scale.x = length / width;
+        const surface = existing.undersideHeight + existing.thickness;
+        bowl.position.set(x, surface, z);
+        bowl.castShadow = true;
+        fixtureGroup.add(bowl);
+        const drain = new THREE.Mesh(
+          new THREE.CylinderGeometry(22, 22, 4, 24),
+          new THREE.MeshStandardMaterial({
+            color: '#c3cbcf',
+            roughness: 0.25,
+            metalness: 0.8,
+          }),
+        );
+        drain.position.set(x, surface + wall + 2, z);
+        fixtureGroup.add(drain);
+      }
+      if (existing.trap) {
+        // Illustrative U-bend: down from the slab, round the bottom, into the wall.
+        const { x, frontZ, lowestHeight, radius } = existing.trap;
+        const z = frontZ - radius,
+          bottom = lowestHeight + radius;
+        const pipe = new THREE.Mesh(
+          new THREE.TubeGeometry(
+            new THREE.CatmullRomCurve3([
+              new THREE.Vector3(x, existing.undersideHeight, z),
+              new THREE.Vector3(x, bottom + 50, z),
+              new THREE.Vector3(x, bottom, z - 35),
+              new THREE.Vector3(x, bottom + 50, z - 75),
+              new THREE.Vector3(x, bottom + 60, frame.backZ),
+            ]),
+            48,
+            radius,
+            14,
+            false,
+          ),
+          new THREE.MeshStandardMaterial({
+            color: '#c3cbcf',
+            roughness: 0.3,
+            metalness: 0.6,
+          }),
+        );
+        pipe.castShadow = true;
+        fixtureGroup.add(pipe);
+      }
     }
     function label(text: string, position: THREE.Vector3, color = '#256377') {
       const c = document.createElement('canvas');

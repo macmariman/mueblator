@@ -178,6 +178,13 @@ function moduleStep(
           : 'Levantala de plano, nunca apoyada de canto sobre una esquina: es por donde se parte.',
       };
     case 'doors':
+      if (module.cupBoring === 'workshop')
+        return {
+          title: 'Colgar las puertas',
+          body: `${ids} vienen del taller con las cazoletas perforadas. Atornillá las bisagras a la hoja, después las bases al mueble, y colgá. Dejá la regulación fina para el último paso.`,
+          caution:
+            'Antes de fijar las bases, presentá la bisagra en la cazoleta: si el taller perforó para otro modelo, no calza. Pedí las bisagras con las que perforaron.',
+        };
       return {
         title: 'Colgar las puertas',
         body: `${ids}. Perforá las cazoletas con la mecha copa y el tope de profundidad puesto, atornillá las bisagras a la hoja, después las bases al mueble, y colgá. Dejá la regulación fina para el último paso.`,
@@ -362,9 +369,16 @@ export function buildTools(
       tool('Detector de cables y caños', 'Antes de perforar una pared. Un caño de agua o un cable perforado cuesta más que el mueble.', 'Medir y marcar'),
     );
   }
-  if (has(/cazoleta/i))
+  // The cup bit only when some leaf is bored at home; the adjustment is always ours.
+  const boredAtHome = byModule.some(
+    ({ module }) => module.kind === 'doors' && module.cupBoring !== 'workshop',
+  );
+  if (has(/cazoleta/i) && boredAtHome)
     tools.push(
       tool('Mecha copa (Forstner)', 'La cazoleta de la bisagra. Con tope de profundidad: el agujero no atraviesa la puerta.', 'Perforar y atornillar', '35 mm'),
+    );
+  if (has(/cazoleta/i))
+    tools.push(
       tool('Destornillador de mano', 'La regulación fina de las bisagras, que se hace con la mano y no con el taladro.', 'Perforar y atornillar'),
     );
   if (spec.materials.some((m) => m.banding !== false))
