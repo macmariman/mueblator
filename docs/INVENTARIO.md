@@ -73,6 +73,10 @@ _(vacío)_
   - Fijas de 150 mm: ABS de $99 a $149, aluminio Curve a $349.
   - Hay además fijas de 100, 120 y 200 mm.
   - La web no muestra stock, carga máxima, forma de fijación ni largo de tornillo. Hay que verlo en el local.
+- **Cuñas plásticas, Sodimac Uruguay** (web, 2026-09-13).
+  - La única cuña con punta es «Cuñas para nivelación 100 unidades» (Cortag, $299), pensada para nivelar cerámica. La web no dice qué grosor alcanza.
+  - No venden calzas planas en U para patas. Lo más parecido son espaciadores de juntas de 1 a 10 mm, en cruz o en T.
+  - En MercadoLibre aparece una cuña niveladora de pisos de 9 × 1,6 cm (100 unidades), sin verificar.
 
 ### Proveedores
 
