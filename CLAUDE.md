@@ -71,6 +71,9 @@ design file rather than the numbers scattered through the modules.
   each module proposes (hinges, wall fixings). Proposals are always `'proposed'`.
 - `src/lib/assembly.ts` — the assembly order and the tool list, on the same
   rule: derived from the modules, always `'proposed'`, overridable per step.
+- `src/lib/drilling.ts` — drilling plans: confirmat at every edge-to-face
+  joint, hinge cups and plates, shelf pins, each with who drills it. Opt-in per
+  design, always `'proposed'`.
 - `src/lib/fixtures/basin-geometry.ts` — basin profile and the matching cutout.
 - `src/components/CabinetView.tsx` — Three.js scene; reads only the built model.
 - `src/components/App.tsx` — controls, inspector, cut list, printed manual.
@@ -162,3 +165,7 @@ it in `note` or `pending`, and leave the decision to the user.
   by declaring one with the same `covers`.
 - The printed picture is always the assembled piece with dimensions, doors closed
   and fixtures visible, whatever is on screen at the time.
+
+## Knowledge base
+
+This app's notes (purpose, decisions, backlog, ideas) live in Martin's Logseq KB: [[Apps/Mueblator]] → `~/LogSeq/pages/Apps___Mueblator.md`. Use the `kb` skill to read it or to record something there (only when asked).

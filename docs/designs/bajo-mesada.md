@@ -179,6 +179,27 @@ punto, y bajo el frentín sólo hay 10 mm de margen. Si el piso baja más de
 10 mm a lo ancho, la caja no entra. Hay dos salidas: medir la pendiente, o
 bajar la caja (por ejemplo, a 520 mm de alto).
 
+## Planos de perforación (2026-09-13)
+
+El manual trae un plano por pieza, derivado del modelo. Todo es propuesta.
+
+- **Confirmat:** 28, en las uniones de canto contra cara. En Uruguay se venden
+  como «tornillo para mueble 7 × 50» (Sodimac, 20 unidades a $219) o
+  «tornillo estructural». La mecha escalonada no apareció en ninguna tienda
+  uruguaya que se pudo revisar (2026-09-13): lo más simple es que perfore el
+  taller. Quién perfora está
+  **por definir**: el usuario lo averigua en el taller. El manual dice «si no
+  vienen perforadas» y deja la mecha escalonada en la lista de herramientas.
+- **Cazoletas:** 4, dos por puerta. Las perfora el **taller**, como ya estaba
+  decidido.
+- **Bases de bisagra** (8 guías de 3 mm) y **soportes del estante central**
+  (4 de 5 mm): en los divisores, **en casa**, antes de armar la caja.
+- **Manijas:** sin plano, falta la distancia entre agujeros.
+- Como los estantes están alineados, en la cara de cada divisor que da al
+  centro los soportes del estante central quedan 15 mm por debajo de los
+  confirmat del estante de nicho. Entran igual, pero es un lugar apretado si
+  se cambia una altura.
+
 ## Ferretería y herramientas
 
 Todo está como propuesta, marcado «a confirmar», en el archivo del diseño.

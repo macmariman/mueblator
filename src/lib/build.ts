@@ -11,6 +11,7 @@ import {
   type AssemblyStep,
   type ToolLine,
 } from './assembly.ts';
+import { buildDrilling, type Drilling } from './drilling.ts';
 import { cm, fmt } from './units.ts';
 import type {
   Annotation,
@@ -47,6 +48,8 @@ export type Model = {
   groups: CutGroup[];
   /** Hinges, screws and plugs: declared by the design or proposed by a module. */
   hardware: HardwareLine[];
+  /** Every hole, and one plan per board drilled alike. Empty unless declared. */
+  drilling: Drilling;
   /** The order the piece goes together in, and the tools each step asks for. */
   assembly: AssemblyStep[];
   tools: ToolLine[];
@@ -308,6 +311,7 @@ export function buildDesign(spec: DesignSpec): Model {
   const frame = buildFrame(spec),
     { parts, byModule } = buildParts(spec, frame);
   const hardware = buildHardware(spec, byModule);
+  const drilling = buildDrilling(spec, byModule, parts);
   const printSubtitle =
     spec.printSubtitle ??
     `${openingLabel(spec)}: ${fmt(frame.width)} × ${fmt(frame.depth)} mm · cara inferior de tapa: ${fmt(frame.undersideHeight)} mm · altura total de referencia: ${fmt(frame.topHeight)} mm.`;
@@ -317,8 +321,9 @@ export function buildDesign(spec: DesignSpec): Model {
     parts,
     groups: groupParts(parts),
     hardware,
-    assembly: buildAssembly(spec, byModule, parts, hardware),
-    tools: buildTools(spec, byModule, hardware),
+    drilling,
+    assembly: buildAssembly(spec, byModule, parts, hardware, drilling.holes),
+    tools: buildTools(spec, byModule, hardware, drilling.holes),
     walls: buildWalls(spec, frame),
     fixtures: spec.fixtures ?? [],
     dimensions: buildDimensions(spec, frame),

@@ -203,6 +203,46 @@ screwed to a wall asks for a percussion drill and for the wall type to be
 settled). A design adds its own with `tools`, and a declared tool with the same
 name replaces the derived one.
 
+## Drilling plans
+
+`src/lib/drilling.ts` works out where every hole goes, board by board, when the
+design declares `drilling` (without it, the manual has no drilling section):
+
+```ts
+drilling: {
+  joints: { by: 'pending' },                  // a confirmat at every edge-to-face joint
+  shelfPins: { parts: ['E03'], by: 'home' },  // four pins under each loose shelf
+  hingePlates: { by: 'home' },                // pilots for each hinge mounting plate
+},
+```
+
+Hinge cups come with any `doors` module and take `cupBoring` as their answer.
+`by` says who drills: `'workshop'`, `'home'`, or `'pending'` while the user has
+not asked. It changes the manual. An assembly step names the plans it relies on
+("perforá antes", "vienen perforadas", "si no vienen perforadas"), and the
+bits for home drilling join the tool list — the step drill for confirmat, the
+5 mm bit with a stop for pins.
+
+The rules are trade rules of thumb, so every position is a proposal:
+
+| Hole | Where | Rule |
+| --- | --- | --- |
+| Confirmat | through the face board, into the middle of the other board's edge | 50 mm from each end, at most 250 mm apart, one in the middle of a joint shorter than 100 mm |
+| Hinge cup | on the inner face of the leaf | Ø35 × 13, centre 22.5 mm from the hinge edge, 100 mm from the ends |
+| Hinge plate | on the face of the board the leaf hangs from, towards the leaf | two Ø3 pilots 32 mm apart, 37 mm back from the front edge |
+| Shelf pin | on the board facing each end of the shelf | Ø5 × 10, 40 mm in from front and back, 6 mm under the shelf |
+
+Contacts that are face to face or edge to edge are not joints it knows how to
+screw; `joints.exclude` leaves out boards that are loose or glued. Boards drilled
+alike share a plan: distances are measured from named edges ("canto
+delantero", "canto hacia afuera", "canto de bisagras"), never from a corner of
+the drawing, so a left and a right board come out the same. A hole is drilled
+with the board it sits on, so the step that places a divider carries its pin and
+plate holes, not the step of the shelf or the door that uses them.
+
+Handle holes are not drawn yet: they need the distance between the handle's
+holes, which no design knows so far.
+
 ## What the tests guarantee
 
 `tests/designs.test.mjs` runs against every registered design:

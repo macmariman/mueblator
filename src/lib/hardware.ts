@@ -42,7 +42,7 @@ const fixingSpacing = 400;
 const groupOrder = ['Herrajes', 'Fijación a pared', 'Ensamble', 'Consumibles'];
 
 /** Trade rule of thumb, stated in the note so it can be overruled. */
-function hingesForLeaf(height: number) {
+export function hingesForLeaf(height: number) {
   if (height <= 900) return 2;
   if (height <= 1600) return 3;
   return 4;

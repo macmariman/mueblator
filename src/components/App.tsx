@@ -27,6 +27,7 @@ import CabinetView, {
   type ViewHandle,
   type ViewOptions,
 } from '@/components/CabinetView';
+import DrillPlans from '@/components/DrillPlans';
 import { buildDesign, openingLabel, type Model } from '@/lib/build';
 import { designById, designs } from '@/designs';
 import { cutLabel, fmt } from '@/lib/units';
@@ -217,6 +218,18 @@ function AssemblySteps({ model }: { model: Model }) {
                 )}
               </p>
             )}
+            {step.drilling.map(({ by, boards }) => (
+              <p key={by} className={`step-drill by-${by}`}>
+                <strong>
+                  {by === 'home'
+                    ? 'Perforá antes, con el plano de'
+                    : by === 'pending'
+                      ? 'Si no vienen perforadas, seguí el plano de'
+                      : 'Vienen perforadas del taller:'}
+                </strong>{' '}
+                {boards.join(' · ')}
+              </p>
+            ))}
             <p>{step.body}</p>
             {step.caution && (
               <p className="step-caution">
@@ -284,7 +297,24 @@ export default function App() {
     printImage = useRef<HTMLImageElement>(null),
     selectedRow = useRef<HTMLTableRowElement>(null);
   const selected = model.parts.find((p) => p.id === options.selected);
+  const selectedHoles = model.drilling.holes.filter(
+    (h) => h.board === options.selected,
+  ).length;
   const hasFixtures = model.fixtures.length > 0;
+  const hasDrilling = model.drilling.plans.length > 0,
+    hasHardware = model.hardware.length > 0;
+  // Sections are numbered in the order they appear, whichever ones there are.
+  const sectionNumbers = (() => {
+    let n = 0;
+    const next = () => String(++n).padStart(2, '0');
+    return {
+      pieces: next(),
+      drilling: hasDrilling ? next() : '',
+      hardware: hasHardware ? next() : '',
+      assembly: next(),
+    };
+  })();
+  const handlesPending = model.parts.some((p) => p.handle);
   const select = useCallback(
     (id: string) => setOptions((v) => ({ ...v, selected: id })),
     [],
@@ -336,6 +366,12 @@ export default function App() {
     select(id);
     document
       .getElementById('modelo')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  /** Jump from the inspector to the drilling plan of the selected board. */
+  function showPlan(id: string) {
+    document
+      .getElementById(`plano-${id}`)
       ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   /** Jump from the inspector to the row of the board selected in the 3D view. */
@@ -541,9 +577,25 @@ export default function App() {
                   {selected.machining && (
                     <p className="machining-note">{machiningLabel(selected)}</p>
                   )}
+                  {selectedHoles > 0 && (
+                    <p className="inspector-drilling">
+                      <strong>
+                        {selectedHoles} {selectedHoles === 1 ? 'agujero' : 'agujeros'}
+                      </strong>
+                      , marcados en el dibujo.
+                    </p>
+                  )}
                   <button className="quiet-link" onClick={showInList}>
                     Verla en la lista de corte <ArrowDown size={16} />
                   </button>
+                  {selectedHoles > 0 && (
+                    <button
+                      className="quiet-link"
+                      onClick={() => showPlan(selected.id)}
+                    >
+                      Ver su plano de perforación <ArrowDown size={16} />
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
@@ -577,7 +629,7 @@ export default function App() {
         <section className="content-section" id="piezas">
           <div className="section-heading">
             <div>
-              <span className="eyebrow">01 / DESPIECE</span>
+              <span className="eyebrow">{sectionNumbers.pieces} / DESPIECE</span>
               <h2>Lista de maderas</h2>
             </div>
             <span className="unit-badge">Todas las medidas en mm</span>
@@ -597,11 +649,38 @@ export default function App() {
             />
           </div>
         </section>
-        {model.hardware.length > 0 && (
+        {hasDrilling && (
+          <section className="content-section" id="perforaciones">
+            <div className="section-heading">
+              <div>
+                <span className="eyebrow">
+                  {sectionNumbers.drilling} / PERFORACIONES
+                </span>
+                <h2>Planos de perforación</h2>
+              </div>
+              <span className="unit-badge">Propuesta · medidas en mm</span>
+            </div>
+            <p className="section-intro">
+              Dónde va cada agujero, pieza por pieza. Las distancias se miden
+              desde el canto que dice la tabla, no desde el dibujo. Todo es
+              propuesta: la bisagra y la manija que elijas pueden correr las
+              posiciones. Los confirmat se perforan con la unión presentada y
+              prensada: la mecha escalonada hace el pasante, el avellanado y el
+              agujero en el canto de la otra pieza en una sola pasada.
+              «Pasante» es un agujero que atraviesa la pieza de lado a lado;
+              «avellanado», la boca del agujero rebajada en forma de cono, para
+              que la cabeza del tornillo quede al ras y no sobresalga.
+              {handlesPending &&
+                ' Las manijas todavía no están: falta la distancia entre agujeros.'}
+            </p>
+            <DrillPlans model={model} />
+          </section>
+        )}
+        {hasHardware && (
           <section className="content-section" id="ferreteria">
             <div className="section-heading">
               <div>
-                <span className="eyebrow">02 / FERRETERÍA</span>
+                <span className="eyebrow">{sectionNumbers.hardware} / FERRETERÍA</span>
                 <h2>Herrajes y fijaciones</h2>
               </div>
               <span className="unit-badge">Cantidades de referencia</span>
@@ -619,9 +698,7 @@ export default function App() {
         <section className="content-section" id="armado">
           <div className="section-heading">
             <div>
-              <span className="eyebrow">
-                {model.hardware.length > 0 ? '03' : '02'} / ARMADO
-              </span>
+              <span className="eyebrow">{sectionNumbers.assembly} / ARMADO</span>
               <h2>Orden de armado</h2>
             </div>
             <span className="unit-badge">Propuesta, no instructivo</span>
@@ -679,7 +756,19 @@ export default function App() {
           {model.parts.length} piezas en total.
         </p>
         <CutTable model={model} />
-        {model.hardware.length > 0 && (
+        {hasDrilling && (
+          <>
+            <h2>Planos de perforación</h2>
+            <p>
+              Propuesta. Distancias desde el canto que indica cada tabla; los
+              agujeros punteados van en la cara de atrás del dibujo.
+              {handlesPending &&
+                ' Faltan las manijas: la distancia entre agujeros está por definir.'}
+            </p>
+            <DrillPlans model={model} />
+          </>
+        )}
+        {hasHardware && (
           <>
             <h2>Herrajes y fijaciones</h2>
             <p>

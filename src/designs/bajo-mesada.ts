@@ -278,12 +278,14 @@ export const bajoMesada: DesignSpec = {
     },
     {
       id: 'H05',
-      name: 'Tornillo confirmat',
-      spec: '7 × 50 mm',
-      quantity: 30,
+      name: 'Tornillo para mueble (confirmat)',
+      spec: '7 × 50 mm, cabeza Allen',
+      sourcing:
+        'Sodimac Uruguay: «Tornillo para mueble 7 x 50 mm x 20 unidades» (Fixser), $219 el paquete; hacen falta 2. En otras casas, «tornillo estructural 7 x 50». Precio de la web, 2026-09-13.',
+      quantity: 28, // the count of the drilling plan; the tests keep them equal
       group: 'Ensamble',
       status: 'proposed',
-      note: 'Laterales contra piso y travesaños, divisores, travesaños traseros y estantes de nicho. Cantidad estimada. En el canto del melamínico agarra mucho más que un tornillo común, y en una caja sin fondo eso importa. Averiguar si el taller entrega las piezas perforadas; si no, hace falta una mecha escalonada para confirmat, o volver al tornillo de 4 × 50 con pretaladro.',
+      note: 'Laterales contra piso y travesaños, divisores, travesaños traseros y estantes de nicho: los que marcan los planos de perforación. En el canto del melamínico agarra mucho más que un tornillo común, y en una caja sin fondo eso importa. Averiguar si el taller entrega las piezas perforadas; si no, hace falta una mecha escalonada para confirmat, o volver al tornillo de 4 × 50 con pretaladro.',
     },
     {
       id: 'H06',
@@ -328,15 +330,23 @@ export const bajoMesada: DesignSpec = {
       status: 'proposed',
     },
   ],
-  // Nothing is drilled into the walls, so no percussion drill, tile bit or detector.
+  // Nothing is drilled into the walls, so no percussion drill, tile bit or
+  // detector; the bits for the carcass follow from the drilling plans.
   tools: [
     {
-      name: 'Mecha de 5 mm con tope',
-      reason: 'Los agujeros de los soportes del estante central, sin atravesar el divisor.',
+      name: 'Punta o llave Allen',
+      spec: 'La medida del tornillo, suele ser 4 mm',
+      reason:
+        'Los tornillos para mueble de Sodimac son cabeza Allen: una punta hexagonal en el taladro, o la llave en L para el apriete final.',
       group: 'Perforar y atornillar',
       status: 'proposed',
     },
   ],
+  drilling: {
+    joints: { by: 'pending' }, // the user is asking the workshop
+    shelfPins: { parts: ['E03'], by: 'home' },
+    hingePlates: { by: 'home' },
+  },
   dimensions: [
     {
       from: [outer + 40, 0, opening.depth / 2 + 20],

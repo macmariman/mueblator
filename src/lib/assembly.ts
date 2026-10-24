@@ -14,10 +14,12 @@
  * that shows it says so.
  */
 
+import type { Hole } from './drilling.ts';
 import type {
   AssemblyStepSpec,
   AssemblyTarget,
   DesignSpec,
+  DrillBy,
   MaterialSpec,
   ModuleSpec,
   Part,
@@ -42,6 +44,11 @@ export type AssemblyStep = {
   status: 'confirmed' | 'proposed';
   /** `'derived'` steps come from the modules, never from the design file. */
   origin: 'declared' | 'derived';
+  /**
+   * Drilling plans this step relies on, by who drills them: the step does not
+   * repeat the positions, it names the boards whose plan to follow.
+   */
+  drilling: { by: DrillBy; boards: string[] }[];
 };
 
 export type ToolLine = ToolItem & {
@@ -240,6 +247,7 @@ export function buildAssembly(
   byModule: ModuleParts[],
   parts: Part[],
   hardware: HardwareLine[],
+  holes: Hole[] = [],
 ): AssemblyStep[] {
   const material = (id: string) => spec.materials.find((m) => m.id === id);
   // One bucket per step: a module of its own, or every hand-placed board that
@@ -281,14 +289,14 @@ export function buildAssembly(
     });
 
   const { prep, finish } = bookends(spec, parts, hardware);
-  const skeleton: { target: AssemblyTarget; step: Omit<AssemblyStep, 'id' | 'order'> }[] = [
+  const skeleton: { target: AssemblyTarget; step: Omit<AssemblyStep, 'id' | 'order' | 'drilling'> }[] = [
     { target: 'prep', step: { ...prep, status: 'proposed', origin: 'derived' } },
     ...middle.map(({ key, step }) => ({ target: targetOf(key), step })),
     { target: 'finish', step: { ...finish, status: 'proposed', origin: 'derived' } },
   ];
 
   const declared = spec.assembly ?? [];
-  const asStep = (item: AssemblyStepSpec): Omit<AssemblyStep, 'id' | 'order'> => ({
+  const asStep = (item: AssemblyStepSpec): Omit<AssemblyStep, 'id' | 'order' | 'drilling'> => ({
     title: item.title,
     body: item.body,
     caution: item.caution ?? null,
@@ -311,9 +319,23 @@ export function buildAssembly(
     .filter((d) => !d.covers || !used.has(d.covers))
     .map(asStep);
   // Extras land before the closing step, which is always the last thing done.
-  const closing = ordered.pop() as Omit<AssemblyStep, 'id' | 'order'>;
+  const closing = ordered.pop() as Omit<AssemblyStep, 'id' | 'order' | 'drilling'>;
+  // A board is drilled before it goes in, flat on the bench: pin and plate
+  // holes on a divider belong to the step that places the divider, not to
+  // the shelf or the door that uses them later.
+  const drillingFor = (placed: string[]) => {
+    const byWho = new Map<DrillBy, Set<string>>();
+    for (const hole of holes.filter((h) => placed.includes(h.board))) {
+      if (!byWho.has(hole.by)) byWho.set(hole.by, new Set());
+      byWho.get(hole.by)!.add(hole.board);
+    }
+    return (['home', 'pending', 'workshop'] as DrillBy[])
+      .filter((by) => byWho.has(by))
+      .map((by) => ({ by, boards: [...byWho.get(by)!].sort() }));
+  };
   return [...ordered, ...extras, closing].map((step, i, all) => ({
     ...step,
+    drilling: drillingFor(step.parts),
     // Two derived steps in a row can share a warning — two rows of cleats on
     // the same wall. Saying it twice on the same page is how a reader learns
     // to skip it, so only the first one keeps it.
@@ -348,6 +370,7 @@ export function buildTools(
   spec: DesignSpec,
   byModule: ModuleParts[],
   hardware: HardwareLine[],
+  holes: Hole[] = [],
 ): ToolLine[] {
   const kinds = new Set(byModule.map(({ module }) => module.kind));
   const has = (re: RegExp) => hardware.some((h) => re.test(`${h.name} ${h.spec ?? ''}`));
@@ -376,6 +399,23 @@ export function buildTools(
   if (has(/cazoleta/i) && boredAtHome)
     tools.push(
       tool('Mecha copa (Forstner)', 'La cazoleta de la bisagra. Con tope de profundidad: el agujero no atraviesa la puerta.', 'Perforar y atornillar', '35 mm'),
+    );
+  // Holes the workshop does not drill, or might not, bring their bit along.
+  const drilledHere = (kind: Hole['kind']) =>
+    holes.filter((h) => h.kind === kind && h.by !== 'workshop');
+  const confirmats = drilledHere('confirmat');
+  if (confirmats.length > 0)
+    tools.push(
+      tool(
+        'Mecha escalonada para confirmat',
+        `${confirmats.every((h) => h.by === 'pending') ? 'Sólo si el taller no entrega las piezas perforadas. ' : ''}Hace en una pasada el pasante de 7 mm, el avellanado y el agujero de 5 mm en el canto de la otra pieza, con la unión prensada.`,
+        'Perforar y atornillar',
+        'Ø5 / 7 mm',
+      ),
+    );
+  if (drilledHere('shelf-pin').length > 0)
+    tools.push(
+      tool('Mecha de 5 mm con tope', 'Los agujeros de los soportes de estante, sin atravesar la pieza.', 'Perforar y atornillar'),
     );
   if (has(/cazoleta/i))
     tools.push(

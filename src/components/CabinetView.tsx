@@ -241,12 +241,14 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
     const top = built.parts.find((p) => p.role === 'countertop');
     const meshes = new Map<string, THREE.Mesh>(),
       outlines = new Map<string, THREE.Mesh>(),
+      holeMarks = new Map<string, THREE.Group>(),
       doorPivots: { pivot: THREE.Group; part: Part }[] = [];
     /** Halo around the selected board: dark shell, so it reads without colour. */
     const outlineMaterial = new THREE.MeshBasicMaterial({
       color: '#0d2733',
       side: THREE.BackSide,
     });
+    const holeMaterial = new THREE.MeshBasicMaterial({ color: '#0d2733' });
     for (const part of built.parts) {
       const spec = materials.get(part.materialId)!;
       const geometry =
@@ -281,6 +283,28 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
       outline.renderOrder = -1;
       mesh.add(outline);
       outlines.set(part.id, outline);
+      // Holes of the drilling plan, shown only while the board is selected:
+      // dark discs on a white board, readable by lightness alone.
+      const holes = built.drilling.holes.filter((h) => h.board === part.id);
+      if (holes.length > 0) {
+        const marks = new THREE.Group();
+        for (const hole of holes) {
+          const radius = Math.max(hole.diameter / 2, 3);
+          const mark = new THREE.Mesh(
+            new THREE.CylinderGeometry(radius, radius, 1.4, 20),
+            holeMaterial,
+          );
+          const local = hole.at.map((v, i) => v - part.position[i]) as Vec3;
+          local[hole.axis] += hole.sign * 0.8;
+          mark.position.set(...local);
+          if (hole.axis === 0) mark.rotation.z = Math.PI / 2;
+          if (hole.axis === 2) mark.rotation.x = Math.PI / 2;
+          marks.add(mark);
+        }
+        marks.visible = false;
+        mesh.add(marks);
+        holeMarks.set(part.id, marks);
+      }
       if (part.role === 'door' && part.side) {
         const side = part.side;
         // Hinge on the outer edge of the leaf so it opens against its own upright.
@@ -643,6 +667,8 @@ const CabinetView = forwardRef<ViewHandle, Props>(function CabinetView(
         mat.emissive.set(isSelected ? '#ffffff' : '#000000');
         mat.emissiveIntensity = isSelected ? 0.24 : 0;
         outlines.get(p.id)!.visible = isSelected;
+        const marks = holeMarks.get(p.id);
+        if (marks) marks.visible = isSelected;
         if (p.role !== 'door')
           m.position.set(
             ...(p.position.map((v, i) => v + (o.exploded ? p.explode[i] : 0)) as Vec3),

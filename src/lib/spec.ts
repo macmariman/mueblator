@@ -257,6 +257,27 @@ export type FixtureSpec =
   | ExistingTopFixture
   | FeetFixture;
 
+/**
+ * Who drills a kind of hole. `'pending'` is the honest answer while the user
+ * has not asked the workshop yet: the manual then says "if they do not come
+ * drilled", and the tools for doing it at home stay on the list.
+ */
+export type DrillBy = 'workshop' | 'home' | 'pending';
+
+/**
+ * Opt-in drilling plans. Every hole is worked out from the model, so every
+ * position is a proposal until the hardware models are chosen. Hinge cups take
+ * their answer from `cupBoring` on the doors.
+ */
+export type DrillingSpec = {
+  /** A confirmat screw wherever the edge of one board meets the face of another. */
+  joints?: { by: DrillBy; /** References left out: loose or glued boards. */ exclude?: string[] };
+  /** Loose shelves resting on pins, drilled into the boards at their ends. */
+  shelfPins?: { parts: string[]; by: DrillBy };
+  /** Pilot holes for the hinge mounting plates, on the board each leaf hangs from. */
+  hingePlates?: { by: DrillBy };
+};
+
 /** How a hardware line is counted. */
 export type HardwareUnit = 'u' | 'par' | 'juego' | 'm' | 'caja';
 
@@ -397,6 +418,8 @@ export type DesignSpec = {
   assembly?: AssemblyStepSpec[];
   /** Tools declared by hand, on top of the ones the piece asks for. */
   tools?: ToolItem[];
+  /** Drilling plans per board. Without it the manual has no drilling section. */
+  drilling?: DrillingSpec;
   /** Extra floating labels in the 3D view. */
   annotations?: Annotation[];
   /** Extra dimension lines beyond the automatic width/height/depth. */
