@@ -130,7 +130,9 @@ function referenceSign(p: Part, axis: Axis): Sign {
 /** Evenly spaced screw positions over a joint running from `a` to `b`. */
 function screwPositions(a: number, b: number) {
   const length = b - a;
-  if (length < 2 * screwInset) return [(a + b) / 2];
+  // Both end screws land on the same spot once the joint is twice the inset, so
+  // a joint that short takes a single screw in the middle instead.
+  if (length <= 2 * screwInset) return [(a + b) / 2];
   const count = Math.max(
     2,
     Math.ceil((length - 2 * screwInset) / screwSpacing) + 1,
