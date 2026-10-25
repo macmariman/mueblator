@@ -243,6 +243,33 @@ plate holes, not the step of the shelf or the door that uses them.
 Handle holes are not drawn yet: they need the distance between the handle's
 holes, which no design knows so far.
 
+## Ordering the cut: the Cortecloud file
+
+`src/lib/export/cortecloud.ts` writes the cut list as the JSON that Cortecloud
+imports — the platform Barraca Paraná and Barraca Luissi use to take a cutting
+order over the web:
+
+```bash
+node --experimental-strip-types scripts/export-cortecloud.mjs bajo-mesada \
+  --board melamina18=FMBM18 --tape melamina18="ABS Blanco" --out pedido.json
+```
+
+One line per cut group, with the quantity, the finished size, the piece name and
+its references in `complement` (`L01-L02`), so the quote can be read against the
+printed manual. Cortecloud measures `c` along the length and `l` across the
+width, so its `c1`/`c2` are our L1/L2 and its `l1`/`l2` our A1/A2.
+
+The board and tape names belong to the store's price list, not to the design, so
+they are given on the command line and the file carries the design's own labels
+without them. On the way in, Cortecloud asks what each material of the file is
+in its stock and applies the answer to every piece at once — which is the whole
+point of the file: pasting a spreadsheet drops those columns and leaves them to
+be clicked in row by row.
+
+An edge the design left `'pending'` travels as `null`. The file never claims a
+banding the user has not confirmed, and `machining` is always null: the drilling
+plans are proposals, and nothing orders a hole that has not been decided.
+
 ## What the tests guarantee
 
 `tests/designs.test.mjs` runs against every registered design:
