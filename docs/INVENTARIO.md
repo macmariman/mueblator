@@ -119,3 +119,53 @@ _(vacío)_
 ### Proveedores
 
 - **Sodimac Uruguay** (sodimac.com.uy): categoría «Patas para muebles», con 68 productos en la web (2026-09-13).
+
+#### Corte a medida por web (2026-10-24)
+
+Quién corta el melamínico a medida y se le puede pedir desde la web, sin pasar
+por un carpintero. Se probó el flujo de cada uno hasta donde se llegaba sin
+crear una cuenta. **Casi todos esconden el optimizador detrás de un login**;
+hay uno solo que no.
+
+- **Maderas Gabycar** (gabycar.com) — **el único sin cuenta, y el único que
+  nombra «perforado»**. Catálogo de 735 productos con precio en dólares —
+  melamínicos, cantos, bisagras Blum y Häfele, herrajes — y en cada ficha un
+  botón «Agregar al pedido» y una casilla **«Quiero corte perforado y
+  ranurado · Te contactamos para coordinar las medidas junto con el pedido»**.
+  La página «Mi pedido» arma la lista y la manda con **nombre, celular y un
+  comentario libre**: ahí entra la lista de corte entera. Aclara que mandarla
+  no compromete nada, que el vendedor contacta para cerrar precio y entrega.
+  Canto ABS blanco de 22 × 0,4 mm a US$ 0,33 el metro. Domingo Aramburu 1668 y
+  Ruta Perimetral 102 esq. José Belloni. 098 402 016 / 2200 2068, con
+  WhatsApp. Enchapadora SCM de cinco grupos.
+- **Barraca Paraná** (barracaparana.com) — la mejor tienda, el peor acceso. El
+  botón **OPTIMIZAR** de cada tablero lleva a `optimizadoronline.com` (Lepton
+  Optimizer) y **redirige directo a «Mi cuenta»**: hay que estar registrado, y
+  la web no ofrece registro para el optimizador. La otra vía es **Corte
+  Cloud**, con links de invitación por local: el CDL (Cno. Benito Berges 4300)
+  hace corte, canto **y mecanizado**; Egger Haus Montevideo (Democracia 2350)
+  y Maldonado, sólo corte y canto. El MDF melamínico blanco Egger de 18 mm,
+  2,60 × 1,83 m, código FMBM18, está a US$ 62,51; el servicio de corte, código
+  36864, a US$ 0,96; el canto grueso a US$ 1,00 el metro. Hasta 6 cuotas sin
+  interés.
+  - **Los dos límites de máquina del CDL** (vistos al cargar un pedido real,
+    2026-10-24). Para **cortar**, «la medida A no puede ser más pequeño 65»:
+    nada por debajo de 65 mm de ancho. Para **pegar canto**, «C e L debe ser
+    más grande o igual a 100»: una pieza con menos de 100 mm en cualquiera de
+    sus dos lados no se cantea. Conviene tenerlos a la vista al dibujar un
+    travesaño o un zócalo, que es donde se cae.
+- **Corte Cloud** (cortecloud.com/uy) — no es una barraca: es la plataforma que
+  usan Barraca Paraná y Barraca Luissi. **El registro es gratis y de
+  particular**: nombre, apellido, perfil profesional — con **«Aficionado»**
+  entre las opciones, así que no hace falta RUT ni ser carpintero —, mail y
+  contraseña. Adentro se cargan medidas, cantos **y perforaciones** pieza por
+  pieza, y se manda a la tienda vinculada. Es el único camino que toma las
+  perforaciones como dato del pedido.
+- **Placas del Sur** (placasdelsur.uy) — Cno. Maldonado 5407, 091 350 000.
+  Seccionado y enchapado de cantos, entrega en Montevideo y Ciudad de la
+  Costa. Su optimizador es el mismo Lepton, en
+  `optimizadoronline.com/empresa/placasdelsur`, **con login**. No menciona
+  perforado.
+- **Barraca Luissi** (luissi.com.uy) — Ruta 102 casi 101. Tienda online con
+  carrito, tarjeta y PayPal, y melamínicos con precio a la vista. Su
+  optimizador es `barracaluissi.corte.cloud`, **con login**.
