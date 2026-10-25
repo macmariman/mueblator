@@ -179,6 +179,33 @@ punto, y bajo el frentín sólo hay 10 mm de margen. Si el piso baja más de
 10 mm a lo ancho, la caja no entra. Hay dos salidas: medir la pendiente, o
 bajar la caja (por ejemplo, a 520 mm de alto).
 
+## Los travesaños suben a 100 mm (2026-10-25)
+
+Al cargar el pedido real en Corte Cloud, el Centro de Distribución de Barraca
+Paraná rechazó los tres travesaños. Tiene **dos límites de máquina distintos**:
+no corta nada de menos de **65 mm** de ancho («la medida A no puede ser más
+pequeño 65»), y no cantea una pieza con menos de **100 mm** en cualquiera de
+sus dos lados («C e L debe ser más grande o igual a 100»).
+
+Los travesaños eran de 60 mm el delantero y 80 mm los traseros. El usuario
+pidió que **todas las piezas vayan canteadas**, así que los tres pasan a
+**100 mm**, el mínimo que la canteadora acepta. Son medidas propuestas, no
+confirmadas: nunca se midieron contra nada del baño.
+
+Lo que cuesta: el travesaño delantero ahora baja hasta 580 mm del piso en vez
+de 620, así que el hueco de adelante del compartimento central, entre el
+estante y el travesaño, pasa de 187 a **147 mm**. Por ahí se mete la mano para
+llegar al sifón. El de atrás bajo sube a 268 mm y queda 282 mm por debajo del
+sifón, de sobra.
+
+Si 147 mm resulta poco al probarlo, la salida es bajar el estante central, no
+angostar el travesaño: por debajo de 100 mm vuelve a no poder cantearse.
+
+El pedido entero —  14 piezas, tablero MDF Blanco Max de 18 mm y 9,63 m de
+tapacanto ABS blanco de 0,4 × 22 mm — entra ahora sin una sola pieza
+rechazada. El archivo se genera desde el diseño con
+`scripts/export-cortecloud.mjs`.
+
 ## Planos de perforación (2026-09-13)
 
 El manual trae un plano por pieza, derivado del modelo. Todo es propuesta.

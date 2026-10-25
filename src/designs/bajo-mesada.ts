@@ -21,8 +21,13 @@ const panel = 18, // body board thickness
 const sideClearance = 10, // per side: the carcass has to pass the door frame on its way in
   backGap = 10, // against the tiles of the back wall
   topClearance = 10, // under the apron, so the carcass slides in beneath it
-  railHeight = 60,
-  nicheRailHeight = 80,
+  // 100 mm is the smallest piece the workshop will edge band: below that its
+  // bander refuses the piece ("C e L debe ser más grande o igual a 100",
+  // 2026-10-24). The rails were 60 and 80 mm; the user wants every edge
+  // banded, so they grow to the minimum that can be. It costs 40 mm of front
+  // reach into the centre, above the shelf and below the front rail.
+  railHeight = 100,
+  nicheRailHeight = 100,
   doorWidth = 320, // round on purpose; the overlay on the divider follows from it
   doorGap = 2,
   footSetback = 50, // from the front and the sides, clear of the door frame block
